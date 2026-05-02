@@ -152,45 +152,63 @@ struct HomeView: View {
 struct TopMatchCard: View {
     let visa: Visa
 
+    private var fallbackGradient: LinearGradient {
+        LinearGradient(
+            colors: [Color(red: 0.08, green: 0.18, blue: 0.38),
+                     Color(red: 0.15, green: 0.30, blue: 0.50)],
+            startPoint: .topLeading, endPoint: .bottomTrailing
+        )
+    }
+
     var body: some View {
-        ZStack(alignment: .bottomLeading) {
-            RoundedRectangle(cornerRadius: 20)
-                .fill(LinearGradient(
-                    colors: [Color(red: 0.08, green: 0.18, blue: 0.38),
-                             Color(red: 0.15, green: 0.30, blue: 0.50)],
-                    startPoint: .topLeading, endPoint: .bottomTrailing
-                ))
-                .frame(height: 230)
-
-            VStack(alignment: .leading, spacing: 8) {
-                HStack(spacing: 4) {
-                    Image(systemName: "sparkle").font(.caption)
-                    Text("TOP MATCH").font(.caption).fontWeight(.semibold).tracking(1.2)
+        Color.clear
+            .frame(height: 230)
+            .background {
+                AsyncImage(url: CountryUtils.imageURL(for: visa.country)) { phase in
+                    if case .success(let image) = phase {
+                        image.resizable().scaledToFill()
+                    } else {
+                        Rectangle().fill(fallbackGradient)
+                    }
                 }
-                .foregroundColor(.white.opacity(0.85))
-
-                Text(visa.country.uppercased())
-                    .font(.caption).fontWeight(.medium).foregroundColor(.white.opacity(0.75))
-
-                Text(visa.visaName)
-                    .font(.title2).fontWeight(.bold).foregroundColor(.white)
-
-                Text(visa.description)
-                    .font(.subheadline).foregroundColor(.white.opacity(0.8)).lineLimit(2)
-
-                HStack(spacing: 16) {
-                    Label(visa.processingTime, systemImage: "clock").font(.caption)
-                    Label(visa.cost,           systemImage: "creditcard").font(.caption)
-                    Spacer()
-                    Image(systemName: "arrow.right")
-                        .font(.system(size: 15, weight: .semibold)).foregroundColor(.white)
-                        .padding(11).background(Color.blue).clipShape(Circle())
-                }
-                .foregroundColor(.white.opacity(0.85))
             }
-            .padding(20)
-        }
-        .clipShape(RoundedRectangle(cornerRadius: 20))
+            .clipped()
+            .overlay {
+                LinearGradient(
+                    colors: [.black.opacity(0.15), .black.opacity(0.65)],
+                    startPoint: .top, endPoint: .bottom
+                )
+            }
+            .overlay(alignment: .bottomLeading) {
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack(spacing: 4) {
+                        Image(systemName: "sparkle").font(.caption)
+                        Text("TOP MATCH").font(.caption).fontWeight(.semibold).tracking(1.2)
+                    }
+                    .foregroundColor(.white.opacity(0.85))
+
+                    Text(visa.country.uppercased())
+                        .font(.caption).fontWeight(.medium).foregroundColor(.white.opacity(0.75))
+
+                    Text(visa.visaName)
+                        .font(.title2).fontWeight(.bold).foregroundColor(.white)
+
+                    Text(visa.description)
+                        .font(.subheadline).foregroundColor(.white.opacity(0.8)).lineLimit(2)
+
+                    HStack(spacing: 16) {
+                        Label(visa.processingTime, systemImage: "clock").font(.caption)
+                        Label(visa.cost,           systemImage: "creditcard").font(.caption)
+                        Spacer()
+                        Image(systemName: "arrow.right")
+                            .font(.system(size: 15, weight: .semibold)).foregroundColor(.white)
+                            .padding(11).background(Color.blue).clipShape(Circle())
+                    }
+                    .foregroundColor(.white.opacity(0.85))
+                }
+                .padding(20)
+            }
+            .clipShape(RoundedRectangle(cornerRadius: 20))
     }
 }
 
