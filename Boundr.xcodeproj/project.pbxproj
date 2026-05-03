@@ -6,6 +6,11 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		CB87FF022FA73C5700C4AAAE /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = CB87FF012FA73C5700C4AAAE /* FirebaseAuth */; };
+		CB87FF042FA73F2C00C4AAAE /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = CB87FF032FA73F2C00C4AAAE /* GoogleService-Info.plist */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		CB87FEAE2FA6631600C4AAAE /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -28,6 +33,7 @@
 		CB87FEAD2FA6631600C4AAAE /* BoundrTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BoundrTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		CB87FEB72FA6631600C4AAAE /* BoundrUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BoundrUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		CB87FED82FA673E900C4AAAE /* Visa_export.csv */ = {isa = PBXFileReference; lastKnownFileType = text; path = Visa_export.csv; sourceTree = "<group>"; };
+		CB87FF032FA73F2C00C4AAAE /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -53,6 +59,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CB87FF022FA73C5700C4AAAE /* FirebaseAuth in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -81,6 +88,7 @@
 				CB87FEB02FA6631600C4AAAE /* BoundrTests */,
 				CB87FEBA2FA6631600C4AAAE /* BoundrUITests */,
 				CB87FEA12FA6631300C4AAAE /* Products */,
+				CB87FF032FA73F2C00C4AAAE /* GoogleService-Info.plist */,
 			);
 			sourceTree = "<group>";
 		};
@@ -114,6 +122,7 @@
 			);
 			name = Boundr;
 			packageProductDependencies = (
+				CB87FF012FA73C5700C4AAAE /* FirebaseAuth */,
 			);
 			productName = Boundr;
 			productReference = CB87FEA02FA6631300C4AAAE /* Boundr.app */;
@@ -197,6 +206,9 @@
 			);
 			mainGroup = CB87FE972FA6631300C4AAAE;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				CB87FF002FA73C5700C4AAAE /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = CB87FEA12FA6631300C4AAAE /* Products */;
 			projectDirPath = "";
@@ -214,6 +226,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CB87FF042FA73F2C00C4AAAE /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -395,6 +408,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Boundr/Boundr.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
@@ -426,6 +440,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Boundr/Boundr.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
@@ -572,6 +587,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		CB87FF002FA73C5700C4AAAE /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.12.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		CB87FF012FA73C5700C4AAAE /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CB87FF002FA73C5700C4AAAE /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = CB87FE982FA6631300C4AAAE /* Project object */;
 }

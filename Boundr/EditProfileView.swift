@@ -42,10 +42,8 @@ struct EditProfileView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
-                formField(label: "Nationality") {
-                    pickerRow(selection: $draft.nationality,
-                              options: nationalities,
-                              display: { $0 })
+                formField(label: "Nationality (up to 3)") {
+                    nationalityField
                 }
 
                 formField(label: "Age") {
@@ -66,10 +64,6 @@ struct EditProfileView: View {
 
                 formField(label: "Years of experience") {
                     textRow(value: intBinding(\.experienceYears), keyboard: .numberPad)
-                }
-
-                formField(label: "Annual income (USD)") {
-                    textRow(value: intBinding(\.income), keyboard: .numberPad)
                 }
 
                 formField(label: "Relationship status") {
@@ -174,6 +168,60 @@ struct EditProfileView: View {
                 }
             }
         }
+    }
+
+    private var availableNationalities: [String] {
+        nationalities.filter { !draft.nationalities.contains($0) }
+    }
+
+    private var nationalityField: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            // Selected pills
+            if !draft.nationalities.isEmpty {
+                FlowLayout(spacing: 8) {
+                    ForEach(draft.nationalities, id: \.self) { nat in
+                        HStack(spacing: 5) {
+                            Text(nat)
+                                .font(.subheadline).fontWeight(.medium)
+                            Button {
+                                draft.nationalities.removeAll { $0 == nat }
+                            } label: {
+                                Image(systemName: "xmark")
+                                    .font(.system(size: 10, weight: .bold))
+                            }
+                        }
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 12).padding(.vertical, 8)
+                        .background(Color.black)
+                        .cornerRadius(20)
+                    }
+                }
+            }
+
+            // Add button (visible when fewer than 3 selected)
+            if draft.nationalities.count < 3 {
+                Menu {
+                    ForEach(availableNationalities, id: \.self) { nat in
+                        Button(nat) { draft.nationalities.append(nat) }
+                    }
+                } label: {
+                    HStack(spacing: 6) {
+                        Image(systemName: "plus")
+                            .font(.system(size: 12, weight: .semibold))
+                        Text("Add nationality")
+                            .font(.subheadline).fontWeight(.medium)
+                    }
+                    .foregroundColor(.primary)
+                    .padding(.horizontal, 16).padding(.vertical, 14)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(Color(.systemBackground))
+                    .cornerRadius(12)
+                    .overlay(RoundedRectangle(cornerRadius: 12)
+                        .stroke(Color(.systemGray4), lineWidth: 1))
+                }
+            }
+        }
+        .animation(.easeInOut(duration: 0.2), value: draft.nationalities.count)
     }
 
     private func intBinding(_ keyPath: WritableKeyPath<UserProfile, Int>) -> Binding<String> {

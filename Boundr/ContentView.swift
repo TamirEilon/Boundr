@@ -1,4 +1,5 @@
 import SwiftUI
+import FirebaseAuth
 
 // MARK: - ContentView
 
@@ -21,6 +22,12 @@ struct ContentView: View {
 
 struct HomeView: View {
     @EnvironmentObject var store: VisaStore
+    @EnvironmentObject var auth: AuthManager
+
+    private var firstName: String {
+        let name = auth.currentUser?.displayName ?? store.user.firstName
+        return name.components(separatedBy: " ").first ?? name
+    }
 
     private var greeting: String {
         let h = Calendar.current.component(.hour, from: Date())
@@ -54,7 +61,7 @@ struct HomeView: View {
         HStack(alignment: .center) {
             VStack(alignment: .leading, spacing: 2) {
                 Text(greeting).font(.subheadline).foregroundColor(.secondary)
-                Text("Hey, \(store.user.firstName)").font(.title).fontWeight(.bold)
+                Text("Hey, \(firstName)").font(.title).fontWeight(.bold)
             }
             Spacer()
             HStack(spacing: 10) {
@@ -65,7 +72,7 @@ struct HomeView: View {
                 }
                 Circle().fill(Color.black).frame(width: 40, height: 40)
                     .overlay(
-                        Text(String(store.user.fullName.prefix(1)))
+                        Text(String((auth.currentUser?.displayName ?? store.user.fullName).prefix(1)).uppercased())
                             .font(.headline).foregroundColor(.white)
                     )
             }
@@ -284,5 +291,5 @@ struct WorkingTowardRow: View {
 }
 
 #Preview {
-    ContentView().environmentObject(VisaStore())
+    ContentView().environmentObject(VisaStore()).environmentObject(AuthManager())
 }

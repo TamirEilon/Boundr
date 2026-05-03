@@ -50,12 +50,12 @@ struct Visa: Identifiable, Hashable {
 
 struct UserProfile {
     var fullName: String = "Morgan Avila"
-    var nationality: String = "American"
+    var nationalities: [String] = ["American"]
+    var nationality: String { nationalities.first ?? "" }
     var age: Int = 28
     var homeCountry: String = "United States"
     var educationLevel: String = "masters"
     var occupation: String = "Software Engineer"
-    var income: Int = 95_000
     var languages: String = "English, Spanish (B1)"
     var experienceYears: Int = 4
     var relationshipStatus: String = "single"
@@ -72,12 +72,6 @@ struct UserProfile {
         }
     }
 
-    var incomeDisplay: String {
-        let f = NumberFormatter()
-        f.numberStyle = .decimal
-        let s = f.string(from: NSNumber(value: income)) ?? "\(income)"
-        return "$\(s) / yr"
-    }
 }
 
 // MARK: - CountryUtils

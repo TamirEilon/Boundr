@@ -19,9 +19,9 @@ class VisaStore: ObservableObject {
     // MARK: - Eligibility
 
     func isEligible(_ visa: Visa) -> Bool {
-        // Nationality: if list is non-empty, user must appear in it
+        // Nationality: if list is non-empty, at least one of the user's nationalities must appear
         if !visa.eligibleNationalities.isEmpty,
-           !visa.eligibleNationalities.contains(user.nationality) { return false }
+           !user.nationalities.contains(where: { visa.eligibleNationalities.contains($0) }) { return false }
         // Age bounds
         if let min = visa.minAge, user.age < min { return false }
         if let max = visa.maxAge, user.age > max { return false }

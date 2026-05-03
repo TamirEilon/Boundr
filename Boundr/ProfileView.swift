@@ -1,7 +1,9 @@
 import SwiftUI
+import FirebaseAuth
 
 struct ProfileView: View {
     @EnvironmentObject var store: VisaStore
+    @EnvironmentObject var auth: AuthManager
     @State private var showEditProfile = false
 
     var body: some View {
@@ -28,17 +30,26 @@ struct ProfileView: View {
 
     // MARK: User Card
 
+    private var displayName: String {
+        auth.currentUser?.displayName ?? store.user.fullName
+    }
+
+    private var profileSubtitle: String {
+        let country = store.user.nationalities.first ?? store.user.homeCountry
+        return "\(country) · \(store.user.age)"
+    }
+
     private var userCard: some View {
         HStack(spacing: 16) {
             Circle().fill(Color.black).frame(width: 60, height: 60)
                 .overlay(
-                    Text(String(store.user.fullName.prefix(1)))
+                    Text(String(displayName.prefix(1)).uppercased())
                         .font(.title2).fontWeight(.semibold).foregroundColor(.white)
                 )
 
             VStack(alignment: .leading, spacing: 3) {
-                Text(store.user.fullName).font(.headline).fontWeight(.semibold)
-                Text("\(store.user.homeCountry) · \(store.user.age)")
+                Text(displayName).font(.headline).fontWeight(.semibold)
+                Text(profileSubtitle)
                     .font(.subheadline).foregroundColor(.secondary)
             }
 
@@ -93,8 +104,6 @@ struct ProfileView: View {
                 detailRow(icon: "briefcase",              label: "Occupation", value: store.user.occupation)
                 Divider().padding(.leading, 44)
                 detailRow(icon: "chart.line.uptrend.xyaxis", label: "Experience", value: "\(store.user.experienceYears) years")
-                Divider().padding(.leading, 44)
-                detailRow(icon: "creditcard",             label: "Income",     value: store.user.incomeDisplay)
                 Divider().padding(.leading, 44)
                 detailRow(icon: "character.book.closed",  label: "Languages",  value: store.user.languages)
             }
@@ -167,7 +176,7 @@ struct ProfileView: View {
     // MARK: Log Out
 
     private var logOutButton: some View {
-        Button {} label: {
+        Button { try? auth.signOut() } label: {
             HStack(spacing: 8) {
                 Image(systemName: "rectangle.portrait.and.arrow.right").font(.system(size: 15))
                 Text("Log out").font(.subheadline).fontWeight(.semibold)
@@ -180,5 +189,5 @@ struct ProfileView: View {
 }
 
 #Preview {
-    ProfileView().environmentObject(VisaStore())
+    ProfileView().environmentObject(VisaStore()).environmentObject(AuthManager())
 }
