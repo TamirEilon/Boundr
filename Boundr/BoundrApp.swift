@@ -31,11 +31,17 @@ struct BoundrApp: App {
             }
             .animation(.easeInOut(duration: 0.3), value: auth.isSignedIn)
             .animation(.easeInOut(duration: 0.3), value: auth.onboardingComplete)
+            .onAppear {
+                if let uid = auth.currentUser?.uid {
+                    store.loadProfile(for: uid)
+                    if let name = auth.currentUser?.displayName, !name.isEmpty {
+                        store.user.fullName = name
+                    }
+                }
+            }
             .onChange(of: auth.currentUser?.uid) { _, uid in
                 guard let uid else { return }
-                // Load saved profile (restores onboarding data across launches)
                 store.loadProfile(for: uid)
-                // Sync display name from Firebase auth into the profile
                 if let name = auth.currentUser?.displayName, !name.isEmpty {
                     store.user.fullName = name
                 }

@@ -49,6 +49,34 @@ class VisaStore: ObservableObject {
         return true
     }
 
+    func ineligibilityReasons(for visa: Visa) -> [String] {
+        var reasons: [String] = []
+
+        if !visa.eligibleNationalities.isEmpty,
+           !user.nationalities.contains(where: { visa.eligibleNationalities.contains($0) }) {
+            reasons.append("Your nationality is not eligible for this visa")
+        }
+        if let min = visa.minAge, user.age > 0, user.age < min {
+            reasons.append("Minimum age for this visa is \(min)")
+        }
+        if let max = visa.maxAge, user.age > 0, user.age > max {
+            reasons.append("Maximum age for this visa is \(max)")
+        }
+        if !visa.requiredEducation.isEmpty, !user.educationLevel.isEmpty,
+           !visa.requiredEducation.contains(user.educationLevel) {
+            reasons.append("Your education level doesn't meet the requirement")
+        }
+        if let requiredOcc = visa.requiredOccupation, !requiredOcc.isEmpty,
+           !user.occupation.isEmpty {
+            let userOcc = user.occupation.lowercased()
+            let reqOcc  = requiredOcc.lowercased()
+            if !userOcc.contains(reqOcc) && !reqOcc.contains(userOcc) {
+                reasons.append("Your occupation doesn't match the requirement")
+            }
+        }
+        return reasons
+    }
+
     func isSaved(_ visa: Visa) -> Bool { savedVisaIDs.contains(visa.id) }
 
     func toggleSaved(_ visa: Visa) {

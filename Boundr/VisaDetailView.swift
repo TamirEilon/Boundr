@@ -87,7 +87,7 @@ struct VisaDetailView: View {
                         Text(visa.visaName)
                             .font(.title).fontWeight(.bold)
                             .foregroundColor(.white)
-                            .lineLimit(2)
+                            .fixedSize(horizontal: false, vertical: true)
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.horizontal, 20)
@@ -154,6 +154,25 @@ struct VisaDetailView: View {
                 .padding(.horizontal, 14).padding(.vertical, 7)
                 .background((eligible ? Color.green : Color.red).opacity(0.12))
                 .cornerRadius(20)
+
+            if !eligible {
+                let reasons = store.ineligibilityReasons(for: visa)
+                if !reasons.isEmpty {
+                    VStack(alignment: .leading, spacing: 6) {
+                        ForEach(reasons, id: \.self) { reason in
+                            HStack(alignment: .top, spacing: 8) {
+                                Image(systemName: "xmark.circle.fill")
+                                    .font(.system(size: 13))
+                                    .foregroundColor(.red.opacity(0.7))
+                                    .padding(.top, 1)
+                                Text(reason)
+                                    .font(.subheadline)
+                                    .foregroundColor(.secondary)
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -173,7 +192,7 @@ struct VisaDetailView: View {
             Text(label).font(.caption).foregroundColor(.secondary)
             Text(value).font(.subheadline).fontWeight(.bold).lineLimit(2)
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .padding(14)
         .background(Color(.systemBackground))
         .cornerRadius(14)
@@ -183,30 +202,24 @@ struct VisaDetailView: View {
 
     private var requirementsSection: some View {
         VStack(alignment: .leading, spacing: 14) {
-            HStack {
-                Text("Requirements")
-                    .font(.headline).fontWeight(.bold)
-                Spacer()
-                if eligible {
-                    Text("\(visa.requirements.count)/\(visa.requirements.count) met")
-                        .font(.subheadline).foregroundColor(.secondary)
-                }
-            }
+            Text("Requirements")
+                .font(.headline).fontWeight(.bold)
 
             VStack(spacing: 0) {
                 ForEach(Array(visa.requirements.enumerated()), id: \.offset) { idx, req in
-                    HStack(alignment: .center, spacing: 14) {
+                    HStack(alignment: .top, spacing: 14) {
                         ZStack {
                             Circle()
-                                .fill(eligible ? Color.green.opacity(0.12) : Color(.systemGray5))
+                                .fill(Color(.systemGray5))
                                 .frame(width: 30, height: 30)
-                            Image(systemName: eligible ? "checkmark" : "minus")
-                                .font(.system(size: 11, weight: .bold))
-                                .foregroundColor(eligible ? .green : Color(.systemGray3))
+                            Circle()
+                                .fill(Color(.systemGray3))
+                                .frame(width: 8, height: 8)
                         }
                         Text(req)
                             .font(.subheadline)
                             .fixedSize(horizontal: false, vertical: true)
+                            .padding(.top, 6)
                         Spacer()
                     }
                     .padding(.vertical, 14)
@@ -231,24 +244,14 @@ struct VisaDetailView: View {
 
             VStack(spacing: 0) {
                 ForEach(Array(steps.enumerated()), id: \.offset) { idx, step in
-                    HStack(alignment: .top, spacing: 14) {
-                        // Number + connecting line
-                        VStack(spacing: 0) {
-                            ZStack {
-                                Circle()
-                                    .fill(Color(.systemGray6))
-                                    .frame(width: 28, height: 28)
-                                Text("\(idx + 1)")
-                                    .font(.caption).fontWeight(.bold).foregroundColor(.primary)
-                            }
-                            if idx < steps.count - 1 {
-                                Rectangle()
-                                    .fill(Color(.systemGray4))
-                                    .frame(width: 1.5)
-                                    .frame(maxHeight: .infinity)
-                            }
+                    HStack(alignment: .top, spacing: 16) {
+                        ZStack {
+                            Circle()
+                                .fill(Color(.systemGray6))
+                                .frame(width: 28, height: 28)
+                            Text("\(idx + 1)")
+                                .font(.caption).fontWeight(.bold).foregroundColor(.primary)
                         }
-                        .frame(width: 28)
 
                         VStack(alignment: .leading, spacing: 3) {
                             Text(step.title)
@@ -258,7 +261,18 @@ struct VisaDetailView: View {
                                 .fixedSize(horizontal: false, vertical: true)
                         }
                         .padding(.top, 4)
-                        .padding(.bottom, idx < steps.count - 1 ? 20 : 0)
+                        .padding(.bottom, idx < steps.count - 1 ? 24 : 0)
+
+                        Spacer()
+                    }
+                    .background(alignment: .topLeading) {
+                        if idx < steps.count - 1 {
+                            Rectangle()
+                                .fill(Color(.systemGray4))
+                                .frame(width: 1.5)
+                                .padding(.top, 28)
+                                .padding(.leading, 13.25)
+                        }
                     }
                 }
             }
