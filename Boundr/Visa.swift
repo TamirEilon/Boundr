@@ -48,18 +48,19 @@ struct Visa: Identifiable, Hashable {
 
 // MARK: - UserProfile
 
-struct UserProfile {
-    var fullName: String = "Morgan Avila"
-    var nationalities: [String] = ["American"]
-    var nationality: String { nationalities.first ?? "" }
-    var age: Int = 28
+struct UserProfile: Codable {
+    var fullName: String = ""
+    var nationalities: [String] = []
+    var age: Int = 0
     var homeCountry: String = "United States"
-    var educationLevel: String = "masters"
-    var occupation: String = "Software Engineer"
-    var languages: String = "English, Spanish (B1)"
-    var experienceYears: Int = 4
+    var educationLevel: String = ""
+    var occupation: String = ""
+    var languages: String = ""
+    var experienceYears: Int = 0
     var relationshipStatus: String = "single"
 
+    // Computed — excluded from Codable automatically
+    var nationality: String { nationalities.first ?? "" }
     var firstName: String { fullName.components(separatedBy: " ").first ?? fullName }
 
     var educationDisplay: String {
@@ -71,7 +72,6 @@ struct UserProfile {
         default:            return educationLevel.capitalized
         }
     }
-
 }
 
 // MARK: - CountryUtils

@@ -4,8 +4,8 @@ import FirebaseAuth
 
 @main
 struct BoundrApp: App {
-    @StateObject private var store   = VisaStore()
-    @StateObject private var auth    = AuthManager()
+    @StateObject private var store = VisaStore()
+    @StateObject private var auth  = AuthManager()
 
     init() {
         FirebaseApp.configure()
@@ -31,7 +31,11 @@ struct BoundrApp: App {
             }
             .animation(.easeInOut(duration: 0.3), value: auth.isSignedIn)
             .animation(.easeInOut(duration: 0.3), value: auth.onboardingComplete)
-            .onChange(of: auth.currentUser?.uid) { _, _ in
+            .onChange(of: auth.currentUser?.uid) { _, uid in
+                guard let uid else { return }
+                // Load saved profile (restores onboarding data across launches)
+                store.loadProfile(for: uid)
+                // Sync display name from Firebase auth into the profile
                 if let name = auth.currentUser?.displayName, !name.isEmpty {
                     store.user.fullName = name
                 }

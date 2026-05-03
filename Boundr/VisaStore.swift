@@ -7,6 +7,9 @@ class VisaStore: ObservableObject {
     @Published var savedVisaIDs: Set<String> = []
     @Published var user = UserProfile()
 
+    private var cancellables = Set<AnyCancellable>()
+    private var currentUID: String?
+
     init() { loadVisas() }
 
     // MARK: - Computed
@@ -19,15 +22,30 @@ class VisaStore: ObservableObject {
     // MARK: - Eligibility
 
     func isEligible(_ visa: Visa) -> Bool {
-        // Nationality: if list is non-empty, at least one of the user's nationalities must appear
+        // 1. Nationality: at least one of the user's nationalities must be in the list
         if !visa.eligibleNationalities.isEmpty,
-           !user.nationalities.contains(where: { visa.eligibleNationalities.contains($0) }) { return false }
-        // Age bounds
-        if let min = visa.minAge, user.age < min { return false }
-        if let max = visa.maxAge, user.age > max { return false }
-        // Education: if required, user's level must be in the accepted list
-        if !visa.requiredEducation.isEmpty,
-           !visa.requiredEducation.contains(user.educationLevel) { return false }
+           !user.nationalities.contains(where: { visa.eligibleNationalities.contains($0) }) {
+            return false
+        }
+
+        // 2. Age bounds
+        if let min = visa.minAge, user.age > 0, user.age < min { return false }
+        if let max = visa.maxAge, user.age > 0, user.age > max { return false }
+
+        // 3. Education: user's level must be in the accepted list
+        if !visa.requiredEducation.isEmpty, !user.educationLevel.isEmpty,
+           !visa.requiredEducation.contains(user.educationLevel) {
+            return false
+        }
+
+        // 4. Occupation: if visa specifies one, user's occupation must match (case-insensitive)
+        if let requiredOcc = visa.requiredOccupation, !requiredOcc.isEmpty,
+           !user.occupation.isEmpty {
+            let userOcc = user.occupation.lowercased()
+            let reqOcc  = requiredOcc.lowercased()
+            if !userOcc.contains(reqOcc) && !reqOcc.contains(userOcc) { return false }
+        }
+
         return true
     }
 
@@ -39,6 +57,45 @@ class VisaStore: ObservableObject {
         } else {
             savedVisaIDs.insert(visa.id)
         }
+        if let uid = currentUID { saveFavourites(for: uid) }
+    }
+
+    // MARK: - Persistence
+
+    func loadProfile(for uid: String) {
+        currentUID = uid
+        let key = "profile_\(uid)"
+        if let data = UserDefaults.standard.data(forKey: key),
+           let saved = try? JSONDecoder().decode(UserProfile.self, from: data) {
+            user = saved
+        }
+        let favKey = "favourites_\(uid)"
+        if let data = UserDefaults.standard.data(forKey: favKey),
+           let saved = try? JSONDecoder().decode(Set<String>.self, from: data) {
+            savedVisaIDs = saved
+        }
+        startAutoSave(uid: uid)
+    }
+
+    func saveProfile(for uid: String) {
+        if let data = try? JSONEncoder().encode(user) {
+            UserDefaults.standard.set(data, forKey: "profile_\(uid)")
+        }
+    }
+
+    private func saveFavourites(for uid: String) {
+        if let data = try? JSONEncoder().encode(savedVisaIDs) {
+            UserDefaults.standard.set(data, forKey: "favourites_\(uid)")
+        }
+    }
+
+    private func startAutoSave(uid: String) {
+        cancellables.removeAll()
+        $user
+            .dropFirst()
+            .debounce(for: .milliseconds(500), scheduler: RunLoop.main)
+            .sink { [weak self] _ in self?.saveProfile(for: uid) }
+            .store(in: &cancellables)
     }
 
     // MARK: - CSV Loading
@@ -53,9 +110,6 @@ class VisaStore: ObservableObject {
         let rows = parseCSV(content)
         guard rows.count > 1 else { return }
 
-        // Column indices (0-based): country visaType visaName description duration
-        // processingTime cost requirements eligibleNationalities minAge maxAge
-        // requiredOccupation requiredEducation applicationUrl id …
         allVisas = rows.dropFirst().compactMap { fields in
             guard fields.count >= 14 else { return nil }
             return Visa(
@@ -78,7 +132,6 @@ class VisaStore: ObservableObject {
         }
     }
 
-    // Handles quoted fields, escaped "" inside quotes, and multiline fields.
     private func parseCSV(_ content: String) -> [[String]] {
         var rows: [[String]] = []
         var currentRow: [String] = []
@@ -88,7 +141,6 @@ class VisaStore: ObservableObject {
 
         while i < content.endIndex {
             let ch = content[i]
-
             if inQuotes {
                 if ch == "\"" {
                     let next = content.index(after: i)
@@ -104,8 +156,7 @@ class VisaStore: ObservableObject {
                 }
             } else {
                 switch ch {
-                case "\"":
-                    inQuotes = true
+                case "\"": inQuotes = true
                 case ",":
                     currentRow.append(currentField)
                     currentField = ""
@@ -127,12 +178,10 @@ class VisaStore: ObservableObject {
             i = content.index(after: i)
         }
 
-        // Last field / row
         currentRow.append(currentField)
         if currentRow.contains(where: { !$0.isEmpty }) {
             rows.append(currentRow)
         }
-
         return rows
     }
 
