@@ -58,6 +58,7 @@ struct UserProfile {
     var income: Int = 95_000
     var languages: String = "English, Spanish (B1)"
     var experienceYears: Int = 4
+    var relationshipStatus: String = "single"
 
     var firstName: String { fullName.components(separatedBy: " ").first ?? fullName }
 

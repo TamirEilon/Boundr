@@ -2,6 +2,7 @@ import SwiftUI
 
 struct ProfileView: View {
     @EnvironmentObject var store: VisaStore
+    @State private var showEditProfile = false
 
     var body: some View {
         NavigationStack {
@@ -19,6 +20,9 @@ struct ProfileView: View {
             }
             .navigationBarHidden(true)
             .background(Color(.systemGroupedBackground))
+            .navigationDestination(isPresented: $showEditProfile) {
+                EditProfileView(user: store.user)
+            }
         }
     }
 
@@ -40,7 +44,7 @@ struct ProfileView: View {
 
             Spacer()
 
-            Button {} label: {
+            Button { showEditProfile = true } label: {
                 Image(systemName: "pencil")
                     .font(.system(size: 15)).foregroundColor(.primary)
                     .padding(10).background(Color(.systemGray6)).clipShape(Circle())
@@ -115,7 +119,10 @@ struct ProfileView: View {
 
     private var actionsList: some View {
         VStack(spacing: 0) {
-            actionRow(icon: "pencil",       title: "Edit profile",          subtitle: "Update what we match against", badge: nil)
+            Button { showEditProfile = true } label: {
+                actionRow(icon: "pencil", title: "Edit profile", subtitle: "Update what we match against", badge: nil)
+            }
+            .buttonStyle(.plain)
             Divider().padding(.leading, 56)
             actionRow(icon: "bell",         title: "Notifications",         subtitle: "3 new alerts",                  badge: 3)
             Divider().padding(.leading, 56)

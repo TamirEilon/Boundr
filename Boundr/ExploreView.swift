@@ -93,7 +93,7 @@ struct ExploreView: View {
 
                 // List
                 ScrollView {
-                    LazyVStack(spacing: 0) {
+                    LazyVStack(spacing: 12) {
                         ForEach(filteredVisas) { visa in
                             NavigationLink(value: visa) {
                                 VisaListRow(visa: visa, isEligible: store.isEligible(visa))
@@ -101,8 +101,6 @@ struct ExploreView: View {
                             .buttonStyle(.plain)
                         }
                     }
-                    .background(Color(.systemBackground))
-                    .cornerRadius(16)
                     .padding(.horizontal)
                     .padding(.bottom, 20)
                 }
@@ -193,17 +191,21 @@ struct VisaListRow: View {
             }
             .padding(.horizontal, 16).padding(.top, 16)
 
+            Divider().padding(.horizontal, 16).padding(.top, 14)
+
             HStack(spacing: 20) {
-                Label(visa.duration,        systemImage: "clock").font(.caption)
-                Label(visa.cost,            systemImage: "creditcard").font(.caption)
+                Label(visa.duration,       systemImage: "clock").font(.caption)
+                Label(visa.cost,           systemImage: "creditcard").font(.caption)
                 Spacer()
-                Label(visa.processingTime,  systemImage: "calendar").font(.caption)
+                Label(visa.processingTime, systemImage: "calendar").font(.caption)
             }
             .foregroundColor(.secondary)
-            .padding(.horizontal, 16).padding(.top, 10).padding(.bottom, 16)
-
-            Divider().padding(.leading, 82)
+            .padding(.horizontal, 16).padding(.top, 12).padding(.bottom, 16)
         }
+        .background(Color(.systemBackground))
+        .cornerRadius(16)
+        .shadow(color: .black.opacity(0.06), radius: 8, x: 0, y: 2)
+        .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color(.systemGray5), lineWidth: 1))
     }
 }
 

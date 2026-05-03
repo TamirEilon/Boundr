@@ -29,7 +29,7 @@ struct SavedView: View {
                     Spacer()
                 } else {
                     ScrollView {
-                        LazyVStack(spacing: 0) {
+                        LazyVStack(spacing: 12) {
                             ForEach(store.savedVisas) { visa in
                                 NavigationLink(value: visa) {
                                     VisaListRow(visa: visa, isEligible: store.isEligible(visa))
@@ -37,8 +37,6 @@ struct SavedView: View {
                                 .buttonStyle(.plain)
                             }
                         }
-                        .background(Color(.systemBackground))
-                        .cornerRadius(16)
                         .padding(.horizontal)
                         .padding(.bottom, 20)
                     }
