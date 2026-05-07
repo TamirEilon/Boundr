@@ -9,6 +9,29 @@ struct VisaDetailView: View {
     private var eligible: Bool { store.isEligible(visa) }
     private var saved: Bool    { store.isSaved(visa) }
 
+    @State private var showShare = false
+
+    private enum CriterionStatus {
+        case met, notMet, unknown
+        var icon: String {
+            switch self { case .met: return "checkmark.circle.fill"
+                          case .notMet: return "xmark.circle.fill"
+                          case .unknown: return "minus.circle.fill" }
+        }
+        var color: Color {
+            switch self { case .met: return .green
+                          case .notMet: return .red
+                          case .unknown: return Color(.systemGray3) }
+        }
+    }
+
+    private var hasEligibilityCriteria: Bool {
+        !visa.eligibleNationalities.isEmpty
+        || visa.minAge != nil || visa.maxAge != nil
+        || !visa.requiredEducation.isEmpty
+        || (visa.requiredOccupation != nil && !(visa.requiredOccupation!.isEmpty))
+    }
+
     private let steps: [(title: String, detail: String)] = [
         ("Gather documents",       "Passport, proof of income, criminal record, insurance."),
         ("Submit application",     "Apply at consulate or online portal in your country."),
@@ -25,6 +48,7 @@ struct VisaDetailView: View {
                     VStack(alignment: .leading, spacing: 28) {
                         descriptionSection
                         statsSection
+                        if hasEligibilityCriteria { eligibilityCriteriaSection }
                         if !visa.requirements.isEmpty { requirementsSection }
                         howItWorksSection
                         Color.clear.frame(height: 80) // padding for bottom bar
@@ -39,6 +63,12 @@ struct VisaDetailView: View {
         }
         .background(Color(.systemGroupedBackground))
         .toolbar(.hidden, for: .navigationBar)
+        .onAppear { store.recordView(visa) }
+        .sheet(isPresented: $showShare) {
+            let text = "\(visa.visaName) – \(visa.country)\n\(visa.description)"
+            let items: [Any] = visa.applicationURL.isEmpty ? [text] : [text, URL(string: visa.applicationURL)!]
+            ShareSheet(activityItems: items)
+        }
     }
 
     // MARK: - Hero
@@ -47,7 +77,7 @@ struct VisaDetailView: View {
         // The Color.clear rectangle owns the layout size.
         // AsyncImage is a background so it can NEVER inflate the layout width.
         Color.clear
-            .frame(height: 300)
+            .frame(height: 360)
             .background {
                 AsyncImage(url: CountryUtils.imageURL(for: visa.country)) { phase in
                     if case .success(let image) = phase {
@@ -106,7 +136,7 @@ struct VisaDetailView: View {
                     }
                     Spacer()
                     HStack(spacing: 10) {
-                        Button {} label: {
+                        Button { showShare = true } label: {
                             Image(systemName: "square.and.arrow.up")
                                 .font(.system(size: 15))
                                 .foregroundColor(.primary)
@@ -155,24 +185,6 @@ struct VisaDetailView: View {
                 .background((eligible ? Color.green : Color.red).opacity(0.12))
                 .cornerRadius(20)
 
-            if !eligible {
-                let reasons = store.ineligibilityReasons(for: visa)
-                if !reasons.isEmpty {
-                    VStack(alignment: .leading, spacing: 6) {
-                        ForEach(reasons, id: \.self) { reason in
-                            HStack(alignment: .top, spacing: 8) {
-                                Image(systemName: "xmark.circle.fill")
-                                    .font(.system(size: 13))
-                                    .foregroundColor(.red.opacity(0.7))
-                                    .padding(.top, 1)
-                                Text(reason)
-                                    .font(.subheadline)
-                                    .foregroundColor(.secondary)
-                            }
-                        }
-                    }
-                }
-            }
         }
     }
 
@@ -190,19 +202,123 @@ struct VisaDetailView: View {
         VStack(alignment: .leading, spacing: 5) {
             Image(systemName: icon).font(.system(size: 16)).foregroundColor(.secondary)
             Text(label).font(.caption).foregroundColor(.secondary)
-            Text(value).font(.subheadline).fontWeight(.bold).lineLimit(2)
+            Text(value).font(.subheadline).fontWeight(.semibold)
+                .lineLimit(2)
+                .fixedSize(horizontal: false, vertical: true)
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .frame(maxWidth: .infinity, minHeight: 95, alignment: .topLeading)
         .padding(14)
         .background(Color(.systemBackground))
         .cornerRadius(14)
     }
 
-    // MARK: - Requirements
+    // MARK: - Eligibility Criteria
+
+    private var eligibilityCriteriaSection: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            Text("Eligibility Criteria")
+                .font(.headline).fontWeight(.bold)
+
+            VStack(spacing: 0) {
+                // Nationality
+                if !visa.eligibleNationalities.isEmpty {
+                    let status: CriterionStatus = {
+                        guard !store.user.nationalities.isEmpty else { return .unknown }
+                        return store.user.nationalities.contains(where: { visa.eligibleNationalities.contains($0) }) ? .met : .notMet
+                    }()
+                    let value: String = {
+                        if visa.eligibleNationalities.count <= 4 {
+                            return visa.eligibleNationalities.joined(separator: ", ")
+                        }
+                        return "Open to \(visa.eligibleNationalities.count) countries"
+                    }()
+                    criterionRow(label: "Nationality", value: value, status: status)
+                    Divider().padding(.leading, 16)
+                }
+
+                // Age
+                if visa.minAge != nil || visa.maxAge != nil {
+                    let status: CriterionStatus = {
+                        guard store.user.age > 0 else { return .unknown }
+                        if let min = visa.minAge, store.user.age < min { return .notMet }
+                        if let max = visa.maxAge, store.user.age > max { return .notMet }
+                        return .met
+                    }()
+                    let value: String = {
+                        switch (visa.minAge, visa.maxAge) {
+                        case let (min?, max?): return "\(min) – \(max) years"
+                        case let (min?, nil):  return "\(min)+ years"
+                        case let (nil, max?):  return "Under \(max) years"
+                        default:               return ""
+                        }
+                    }()
+                    if visa.minAge != nil || visa.maxAge != nil {
+                        criterionRow(label: "Age", value: value, status: status)
+                        if !visa.requiredEducation.isEmpty || visa.requiredOccupation != nil {
+                            Divider().padding(.leading, 16)
+                        }
+                    }
+                }
+
+                // Education
+                if !visa.requiredEducation.isEmpty {
+                    let status: CriterionStatus = {
+                        guard !store.user.educationLevel.isEmpty else { return .unknown }
+                        return visa.requiredEducation.contains(store.user.educationLevel) ? .met : .notMet
+                    }()
+                    let value = visa.requiredEducation.map { educationDisplay($0) }.joined(separator: " / ")
+                    criterionRow(label: "Education", value: value, status: status)
+                    if visa.requiredOccupation != nil { Divider().padding(.leading, 16) }
+                }
+
+                // Occupation
+                if let occ = visa.requiredOccupation, !occ.isEmpty {
+                    let status: CriterionStatus = {
+                        guard !store.user.occupation.isEmpty else { return .unknown }
+                        let u = store.user.occupation.lowercased(), r = occ.lowercased()
+                        return (u.contains(r) || r.contains(u)) ? .met : .notMet
+                    }()
+                    criterionRow(label: "Occupation", value: occ.capitalized, status: status)
+                }
+            }
+            .background(Color(.systemBackground))
+            .cornerRadius(14)
+        }
+    }
+
+    @ViewBuilder
+    private func criterionRow(label: String, value: String, status: CriterionStatus) -> some View {
+        HStack(spacing: 12) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(label)
+                    .font(.caption).foregroundColor(.secondary)
+                Text(value)
+                    .font(.subheadline).fontWeight(.medium)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            Spacer()
+            Image(systemName: status.icon)
+                .font(.system(size: 22))
+                .foregroundColor(status.color)
+        }
+        .padding(.horizontal, 16).padding(.vertical, 14)
+    }
+
+    private func educationDisplay(_ code: String) -> String {
+        switch code {
+        case "high_school": return "High School"
+        case "bachelors":   return "Bachelor's"
+        case "masters":     return "Master's"
+        case "phd":         return "PhD"
+        default:            return code.capitalized
+        }
+    }
+
+    // MARK: - Application Requirements
 
     private var requirementsSection: some View {
         VStack(alignment: .leading, spacing: 14) {
-            Text("Requirements")
+            Text("Application Requirements")
                 .font(.headline).fontWeight(.bold)
 
             VStack(spacing: 0) {
@@ -282,37 +398,45 @@ struct VisaDetailView: View {
     // MARK: - Bottom Bar
 
     private var bottomBar: some View {
-        HStack(spacing: 12) {
-            Button { store.toggleSaved(visa) } label: {
-                HStack(spacing: 8) {
-                    Image(systemName: saved ? "bookmark.fill" : "bookmark")
-                        .font(.system(size: 15))
-                    Text(saved ? "Saved" : "Save")
-                        .font(.subheadline).fontWeight(.semibold)
-                }
-                .foregroundColor(.primary)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 16)
-                .background(Color(.systemBackground))
-                .cornerRadius(14)
-                .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color(.systemGray4), lineWidth: 1))
-            }
+        GeometryReader { geo in
+            let spacing: CGFloat = 12
+            let totalWidth = geo.size.width - 40 - spacing
+            let saveWidth  = totalWidth / 3
+            let applyWidth = totalWidth * 2 / 3
 
-            Button {
-                if let url = URL(string: visa.applicationURL) { openURL(url) }
-            } label: {
-                Text("Start application")
-                    .font(.subheadline).fontWeight(.semibold)
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
+            HStack(spacing: spacing) {
+                Button { store.toggleSaved(visa) } label: {
+                    HStack(spacing: 6) {
+                        Image(systemName: saved ? "bookmark.fill" : "bookmark")
+                            .font(.system(size: 15))
+                        Text(saved ? "Saved" : "Save")
+                            .font(.subheadline).fontWeight(.semibold)
+                    }
+                    .foregroundColor(.primary)
+                    .frame(width: saveWidth)
                     .padding(.vertical, 16)
-                    .background(visa.applicationURL.isEmpty ? Color.gray : Color.blue)
+                    .background(Color(.systemBackground))
                     .cornerRadius(14)
+                    .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color(.systemGray4), lineWidth: 1))
+                }
+
+                Button {
+                    if let url = URL(string: visa.applicationURL) { openURL(url) }
+                } label: {
+                    Text("Start application")
+                        .font(.subheadline).fontWeight(.semibold)
+                        .foregroundColor(.white)
+                        .frame(width: applyWidth)
+                        .padding(.vertical, 16)
+                        .background(visa.applicationURL.isEmpty ? Color.gray : Color(red: 38/255, green: 99/255, blue: 235/255))
+                        .cornerRadius(14)
+                }
+                .disabled(visa.applicationURL.isEmpty)
             }
-            .disabled(visa.applicationURL.isEmpty)
+            .padding(.horizontal, 20)
+            .padding(.top, 12)
         }
-        .padding(.horizontal, 20)
-        .padding(.vertical, 12)
+        .frame(height: 85)
         .background(.regularMaterial)
         .overlay(alignment: .top) { Divider() }
     }

@@ -4,7 +4,7 @@ struct WelcomeView: View {
     @State private var showSignUp = false
     @State private var showSignIn = false
 
-    private let brandBlue = Color(red: 0.28, green: 0.40, blue: 0.92)
+    private let brandBlue = Color(red: 38/255, green: 99/255, blue: 235/255)
 
     var body: some View {
         NavigationStack {
@@ -25,14 +25,14 @@ struct WelcomeView: View {
                     // Headline
                     Group {
                         Text("Where in the\nworld ")
-                            .font(.system(size: 42, weight: .regular, design: .serif))
+                            .font(.system(size: 42, weight: .bold))
                         + Text("can you")
-                            .font(.system(size: 42, weight: .regular, design: .serif))
-                            .italic()
+                            .font(Font.custom("InstrumentSerif-Italic", size: 44))
                             .foregroundColor(brandBlue)
                         + Text(" go?")
-                            .font(.system(size: 42, weight: .regular, design: .serif))
+                            .font(.system(size: 42, weight: .bold))
                     }
+                    .tracking(-0.5)
                     .lineSpacing(4)
 
                     Spacer().frame(height: 28)
@@ -63,7 +63,7 @@ struct WelcomeView: View {
                             showSignIn = true
                         } label: {
                             Text("I already have an account")
-                                .font(.subheadline).fontWeight(.bold)
+                                .font(.subheadline).fontWeight(.semibold)
                                 .foregroundColor(.primary)
                         }
                         .frame(maxWidth: .infinity)

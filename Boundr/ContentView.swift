@@ -42,10 +42,18 @@ struct HomeView: View {
                 VStack(alignment: .leading, spacing: 24) {
                     headerSection
                     topMatchSection
-                    eligibilityStats
 
-                    if !store.eligibleVisas.isEmpty   { eligibleSection }
-                    if !store.ineligibleVisas.isEmpty { workingTowardSection }
+                    if store.eligibleVisas.isEmpty {
+                        workTowardCarouselSection
+                    } else {
+                        eligibleSection
+                    }
+
+                    if store.recentlyViewedVisas.isEmpty {
+                        if !store.ineligibleVisas.isEmpty { workingTowardSection }
+                    } else {
+                        recentlyViewedSection
+                    }
 
                     Spacer(minLength: 20)
                 }
@@ -64,18 +72,11 @@ struct HomeView: View {
                 Text("Hey, \(firstName)").font(.title).fontWeight(.bold)
             }
             Spacer()
-            HStack(spacing: 10) {
-                Button {} label: {
-                    Image(systemName: "bell.badge")
-                        .font(.system(size: 18)).foregroundColor(.primary)
-                        .padding(10).background(Color(.systemGray6)).clipShape(Circle())
-                }
-                Circle().fill(Color.black).frame(width: 40, height: 40)
-                    .overlay(
-                        Text(String((auth.currentUser?.displayName ?? store.user.fullName).prefix(1)).uppercased())
-                            .font(.headline).foregroundColor(.white)
-                    )
-            }
+            Circle().fill(Color.black).frame(width: 40, height: 40)
+                .overlay(
+                    Text(String((auth.currentUser?.displayName ?? store.user.fullName).prefix(1)).uppercased())
+                        .font(.headline).foregroundColor(.white)
+                )
         }
         .padding(.horizontal).padding(.top)
     }
@@ -86,28 +87,10 @@ struct HomeView: View {
     private var topMatchSection: some View {
         if let visa = store.topMatch {
             NavigationLink(value: visa) {
-                TopMatchCard(visa: visa)
+                TopMatchCard(visa: visa, isEligible: store.topMatchIsEligible)
             }
             .buttonStyle(.plain)
             .padding(.horizontal)
-        }
-    }
-
-    // MARK: Stats
-
-    private var eligibilityStats: some View {
-        HStack(spacing: 20) {
-            statPill(color: .green, label: "Eligible", count: store.eligibleVisas.count)
-            statPill(color: .red,   label: "Not yet",  count: store.ineligibleVisas.count)
-        }
-        .padding(.horizontal)
-    }
-
-    private func statPill(color: Color, label: String, count: Int) -> some View {
-        HStack(spacing: 6) {
-            Circle().fill(color).frame(width: 8, height: 8)
-            Text(label).font(.subheadline)
-            Text("\(count)").font(.subheadline).fontWeight(.semibold)
         }
     }
 
@@ -124,6 +107,30 @@ struct HomeView: View {
                     }
                 }
                 .padding(.horizontal)
+                .padding(.vertical, 6)
+            }
+        }
+    }
+
+    // MARK: Work Toward Carousel (shown when no eligible visas)
+
+    private var workTowardCarouselSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            VStack(alignment: .leading, spacing: 2) {
+                sectionHeader("Visas to work toward")
+                Text("You don't qualify yet — here's what's close.")
+                    .font(.caption).foregroundColor(.secondary)
+                    .padding(.horizontal)
+            }
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 12) {
+                    ForEach(store.ineligibleVisas.prefix(10)) { visa in
+                        NavigationLink(value: visa) { WorkTowardCard(visa: visa) }
+                            .buttonStyle(.plain)
+                    }
+                }
+                .padding(.horizontal)
+                .padding(.vertical, 6)
             }
         }
     }
@@ -132,7 +139,9 @@ struct HomeView: View {
 
     private var workingTowardSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            sectionHeader("Worth working toward")
+            Text("Worth working toward")
+                .font(.headline).fontWeight(.bold)
+                .padding(.horizontal)
             VStack(spacing: 10) {
                 ForEach(store.ineligibleVisas.prefix(3)) { visa in
                     NavigationLink(value: visa) {
@@ -144,13 +153,27 @@ struct HomeView: View {
         }
     }
 
-    private func sectionHeader(_ title: String) -> some View {
-        HStack {
-            Text(title).font(.headline).fontWeight(.bold)
-            Spacer()
-            Button("See all") {}.font(.subheadline).foregroundColor(.blue)
+    // MARK: Recently Viewed
+
+    private var recentlyViewedSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Recently viewed")
+                .font(.headline).fontWeight(.bold)
+                .padding(.horizontal)
+            VStack(spacing: 10) {
+                ForEach(store.recentlyViewedVisas.prefix(5)) { visa in
+                    NavigationLink(value: visa) {
+                        WorkingTowardRow(visa: visa, isEligible: store.isEligible(visa)).padding(.horizontal)
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
         }
-        .padding(.horizontal)
+    }
+
+    private func sectionHeader(_ title: String) -> some View {
+        Text(title).font(.headline).fontWeight(.bold)
+            .padding(.horizontal)
     }
 }
 
@@ -158,6 +181,7 @@ struct HomeView: View {
 
 struct TopMatchCard: View {
     let visa: Visa
+    var isEligible: Bool = true
 
     private var fallbackGradient: LinearGradient {
         LinearGradient(
@@ -186,14 +210,17 @@ struct TopMatchCard: View {
                     startPoint: .top, endPoint: .bottom
                 )
             }
+            .overlay(alignment: .topLeading) {
+                HStack(spacing: 4) {
+                    Image(systemName: isEligible ? "sparkle" : "lock").font(.caption)
+                    Text(isEligible ? "TOP MATCH" : "EXPLORE")
+                        .font(.caption).fontWeight(.semibold).tracking(1.2)
+                }
+                .foregroundColor(.white.opacity(0.85))
+                .padding(20)
+            }
             .overlay(alignment: .bottomLeading) {
                 VStack(alignment: .leading, spacing: 8) {
-                    HStack(spacing: 4) {
-                        Image(systemName: "sparkle").font(.caption)
-                        Text("TOP MATCH").font(.caption).fontWeight(.semibold).tracking(1.2)
-                    }
-                    .foregroundColor(.white.opacity(0.85))
-
                     Text(visa.country.uppercased())
                         .font(.caption).fontWeight(.medium).foregroundColor(.white.opacity(0.75))
 
@@ -209,7 +236,7 @@ struct TopMatchCard: View {
                         Spacer()
                         Image(systemName: "arrow.right")
                             .font(.system(size: 15, weight: .semibold)).foregroundColor(.white)
-                            .padding(11).background(Color.blue).clipShape(Circle())
+                            .padding(11).background(Color(red: 38/255, green: 99/255, blue: 235/255)).clipShape(Circle())
                     }
                     .foregroundColor(.white.opacity(0.85))
                 }
@@ -246,7 +273,53 @@ struct EligibleVisaCard: View {
             }
         }
         .padding(14)
-        .frame(width: 155)
+        .frame(width: 155, height: 160, alignment: .topLeading)
+        .background(Color(.systemBackground))
+        .cornerRadius(16)
+        .shadow(color: .black.opacity(0.07), radius: 8, x: 0, y: 2)
+        .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color(.systemGray5), lineWidth: 1))
+    }
+}
+
+// MARK: - WorkTowardCard
+
+struct WorkTowardCard: View {
+    let visa: Visa
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            ZStack(alignment: .bottomTrailing) {
+                RoundedRectangle(cornerRadius: 10)
+                    .fill(Color(.systemGray5))
+                    .frame(width: 48, height: 48)
+                    .overlay(
+                        Text(visa.countryCode)
+                            .font(.subheadline).fontWeight(.semibold)
+                            .foregroundColor(Color(.systemGray2))
+                    )
+                Image(systemName: "lock.fill")
+                    .font(.system(size: 9, weight: .bold))
+                    .foregroundColor(.white)
+                    .padding(3)
+                    .background(Color(.systemGray3))
+                    .clipShape(Circle())
+                    .offset(x: 4, y: 4)
+            }
+
+            Text(visa.country.uppercased())
+                .font(.caption2).foregroundColor(.secondary).tracking(0.5)
+
+            Text(visa.visaName)
+                .font(.subheadline).fontWeight(.semibold).lineLimit(2)
+                .foregroundColor(.primary)
+
+            HStack(spacing: 4) {
+                Circle().fill(Color(.systemGray4)).frame(width: 6, height: 6)
+                Text(visa.duration).font(.caption).foregroundColor(.secondary).lineLimit(1)
+            }
+        }
+        .padding(14)
+        .frame(width: 155, height: 160, alignment: .topLeading)
         .background(Color(.systemBackground))
         .cornerRadius(16)
         .shadow(color: .black.opacity(0.07), radius: 8, x: 0, y: 2)
@@ -258,6 +331,7 @@ struct EligibleVisaCard: View {
 
 struct WorkingTowardRow: View {
     let visa: Visa
+    var isEligible: Bool = false
 
     var body: some View {
         HStack(spacing: 14) {
@@ -277,10 +351,11 @@ struct WorkingTowardRow: View {
 
             Spacer()
 
-            Text("Not eligible")
-                .font(.caption).fontWeight(.semibold).foregroundColor(.red)
+            Text(isEligible ? "Eligible" : "Not eligible")
+                .font(.caption).fontWeight(.semibold)
+                .foregroundColor(isEligible ? .green : .red)
                 .padding(.horizontal, 10).padding(.vertical, 5)
-                .background(Color.red.opacity(0.1)).cornerRadius(8)
+                .background((isEligible ? Color.green : Color.red).opacity(0.1)).cornerRadius(8)
         }
         .padding(14)
         .background(Color(.systemBackground))

@@ -5,6 +5,7 @@ import Combine
 class VisaStore: ObservableObject {
     @Published var allVisas: [Visa] = []
     @Published var savedVisaIDs: Set<String> = []
+    @Published var recentlyViewedIDs: [String] = []
     @Published var user = UserProfile()
 
     private var cancellables = Set<AnyCancellable>()
@@ -17,7 +18,18 @@ class VisaStore: ObservableObject {
     var eligibleVisas: [Visa]   { allVisas.filter { isEligible($0) } }
     var ineligibleVisas: [Visa] { allVisas.filter { !isEligible($0) } }
     var savedVisas: [Visa]      { allVisas.filter { savedVisaIDs.contains($0.id) } }
-    var topMatch: Visa?         { eligibleVisas.first }
+    var recentlyViewedVisas: [Visa] {
+        recentlyViewedIDs.compactMap { id in allVisas.first { $0.id == id } }
+    }
+
+    var topMatch: Visa? {
+        let visas = eligibleVisas.isEmpty ? allVisas : eligibleVisas
+        guard !visas.isEmpty else { return nil }
+        let day = Calendar.current.ordinality(of: .day, in: .era, for: Date()) ?? 0
+        return visas[day % visas.count]
+    }
+
+    var topMatchIsEligible: Bool { !eligibleVisas.isEmpty }
 
     // MARK: - Eligibility
 
@@ -77,6 +89,13 @@ class VisaStore: ObservableObject {
         return reasons
     }
 
+    func recordView(_ visa: Visa) {
+        recentlyViewedIDs.removeAll { $0 == visa.id }
+        recentlyViewedIDs.insert(visa.id, at: 0)
+        if recentlyViewedIDs.count > 10 { recentlyViewedIDs = Array(recentlyViewedIDs.prefix(10)) }
+        if let uid = currentUID { saveRecentlyViewed(for: uid) }
+    }
+
     func isSaved(_ visa: Visa) -> Bool { savedVisaIDs.contains(visa.id) }
 
     func toggleSaved(_ visa: Visa) {
@@ -102,6 +121,11 @@ class VisaStore: ObservableObject {
            let saved = try? JSONDecoder().decode(Set<String>.self, from: data) {
             savedVisaIDs = saved
         }
+        let recentKey = "recentlyViewed_\(uid)"
+        if let data = UserDefaults.standard.data(forKey: recentKey),
+           let saved = try? JSONDecoder().decode([String].self, from: data) {
+            recentlyViewedIDs = saved
+        }
         startAutoSave(uid: uid)
     }
 
@@ -114,6 +138,12 @@ class VisaStore: ObservableObject {
     private func saveFavourites(for uid: String) {
         if let data = try? JSONEncoder().encode(savedVisaIDs) {
             UserDefaults.standard.set(data, forKey: "favourites_\(uid)")
+        }
+    }
+
+    private func saveRecentlyViewed(for uid: String) {
+        if let data = try? JSONEncoder().encode(recentlyViewedIDs) {
+            UserDefaults.standard.set(data, forKey: "recentlyViewed_\(uid)")
         }
     }
 

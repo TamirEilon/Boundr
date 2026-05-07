@@ -10,7 +10,7 @@ struct SignInView: View {
     @State private var isLoading = false
     @State private var errorMessage: String?
 
-    private let brandBlue = Color(red: 0.28, green: 0.40, blue: 0.92)
+    private let brandBlue = Color(red: 38/255, green: 99/255, blue: 235/255)
 
     var body: some View {
         ScrollView {

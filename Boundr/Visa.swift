@@ -58,6 +58,7 @@ struct UserProfile: Codable {
     var languages: String = ""
     var experienceYears: Int = 0
     var relationshipStatus: String = "single"
+    var numberOfKids: Int = 0
 
     // Computed — excluded from Codable automatically
     var nationality: String { nationalities.first ?? "" }
@@ -70,6 +71,16 @@ struct UserProfile: Codable {
         case "masters":     return "Master's degree"
         case "phd":         return "PhD"
         default:            return educationLevel.capitalized
+        }
+    }
+
+    var maritalStatusDisplay: String {
+        switch relationshipStatus {
+        case "single":   return "Single"
+        case "married":  return "Married"
+        case "divorced": return "Divorced"
+        case "widowed":  return "Widowed"
+        default:         return relationshipStatus.capitalized
         }
     }
 }
@@ -90,79 +101,83 @@ enum CountryUtils {
         return "Other"
     }
 
-    // Returns a direct Unsplash CDN URL for a scenic country photo.
-    // Falls back to nil (caller uses gradient) when no photo is mapped.
     static func imageURL(for country: String) -> URL? {
         guard let id = photoIDs[country] else { return nil }
-        return URL(string: "https://images.unsplash.com/\(id)?w=800&fit=crop&q=80")
+        return URL(string: "https://images.unsplash.com/\(id)?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80")
     }
 
     private static let photoIDs: [String: String] = [
         // Europe
-        "Portugal":       "photo-1555881400-74d7acaacd8b",
-        "Spain":          "photo-1543783207-ec64e4d95325",
-        "Germany":        "photo-1467269204594-9661b134dd2b",
-        "Netherlands":    "photo-1512470876302-972faa2aa9a4",
-        "Sweden":         "photo-1509356843151-3e7d96241e11",
-        "Ireland":        "photo-1590089415225-401ed6f9db8e",
-        "United Kingdom": "photo-1513635269975-59663e0ac1ad",
-        "France":         "photo-1502602898657-3e91760cbb34",
-        "Italy":          "photo-1529260830199-42c24126f198",
-        "Greece":         "photo-1533105079780-92b9be482077",
-        "Switzerland":    "photo-1527168027773-0cc890c4f42e",
-        "Malta":          "photo-1514890547357-a9ee288728e0",
-        "Austria":        "photo-1516550135131-fe3dcb0bedc4",
-        "Belgium":        "photo-1491557345352-5929e343eb89",
-        "Czech Republic": "photo-1541849546-216549ae216d",
-        "Poland":         "photo-1477587458883-47145ed31769",
-        "Hungary":        "photo-1504016798967-7a462f730c38",
-        "Croatia":        "photo-1555990538-c4e4b8e7d8e4",
-        "Norway":         "photo-1513519245088-0e12902e5a38",
-        "Denmark":        "photo-1513622470522-26c3c8a854bc",
-        "Finland":        "photo-1541519227354-08fa5d50c820",
-        "Romania":        "photo-1555990538-c4e4b8e7d8e4",
-        "Iceland":        "photo-1504829857797-ddff29c27927",
-        "Luxembourg":     "photo-1585208798174-6cedd4454a8c",
+        "Portugal":         "photo-1555881400-74d7acaacd8b",
+        "Spain":            "photo-1543783207-ec64e4d95325",
+        "Germany":          "photo-1467269204594-9661b134dd2b",
+        "Netherlands":      "photo-1512470876302-972faa2aa9a4",
+        "Sweden":           "photo-1509356843151-3e7d96241e11",
+        "Ireland":          "photo-1590089415225-401ed6f9db8e",
+        "United Kingdom":   "photo-1513635269975-59663e0ac1ad",
+        "France":           "photo-1502602898657-3e91760cbb34",
+        "Italy":            "photo-1529260830199-42c24126f198",
+        "Greece":           "photo-1533105079780-92b9be482077",
+        "Switzerland":      "photo-1527668752968-14dc70a27c95",
+        "Malta":            "photo-1514890547357-a9ee288728e0",
+        "Austria":          "photo-1520675746836-92b1c1d267ad",
+        "Belgium":          "photo-1491557345352-5929e343eb89",
+        "Czech Republic":   "photo-1541849546-216549ae216d",
+        "Poland":           "photo-1563177978-4c5ffc081b2a",
+        "Croatia":          "photo-1767026054594-fbd20c8d4a34",
+        "Norway":           "photo-1544085311-11a028465b03",
+        "Denmark":          "photo-1513622470522-26c3c8a854bc",
+        "Finland":          "photo-1578054320988-a2ac16f42591",
+        "Estonia":          "photo-1634937810870-4ce3744c3a42",
+        "Iceland":          "photo-1504829857797-ddff29c27927",
+        "Hungary":          "photo-1504016798967-7a462f730c38",
+        "Romania":          "photo-1562566861-5ba35d8c4889",
+        "Luxembourg":       "photo-1585208798174-6cedd4454a8c",
         // Americas
-        "Canada":         "photo-1517935706615-2717063c2225",
-        "Mexico":         "photo-1518638150340-f706e86654de",
-        "Brazil":         "photo-1483729558449-99ef09a8c325",
-        "Argentina":      "photo-1612294037637-ec328d0e075e",
-        "Costa Rica":     "photo-1518459031867-a89b944bffe4",
-        "Colombia":       "photo-1591604466107-ec97de577aff",
-        "Chile":          "photo-1464822759023-fed622ff2c3b",
-        "Peru":           "photo-1526392060635-9d6019884377",
-        "Panama":         "photo-1554795080-0b4a5db2f1dc",
+        "United States":    "photo-1485738422979-f5c462d49f74",
+        "Canada":           "photo-1517935706615-2717063c2225",
+        "Mexico":           "photo-1518638150340-f706e86654de",
+        "Brazil":           "photo-1483729558449-99ef09a8c325",
+        "Argentina":        "photo-1612294037637-ec328d0e075e",
+        "Costa Rica":       "photo-1611223156134-07ade11dfe6a",
+        "Colombia":         "photo-1591604466107-ec97de577aff",
+        "Chile":            "photo-1464822759023-fed622ff2c3b",
+        "Peru":             "photo-1526392060635-9d6019884377",
+        "Panama":           "photo-1554795080-0b4a5db2f1dc",
         // Asia
-        "Japan":          "photo-1528360983277-13d401cdc186",
-        "Singapore":      "photo-1525625293386-3f8f99389edd",
-        "South Korea":    "photo-1617541086271-4d4d04c73957",
-        "Thailand":       "photo-1528181304800-259b08848526",
-        "India":          "photo-1524492412937-b28074a5d7da",
-        "Vietnam":        "photo-1557750255-c76072a7aad1",
-        "Indonesia":      "photo-1537996194471-e657df975ab4",
-        "Malaysia":       "photo-1596422846543-75c6fc197f11",
-        "Philippines":    "photo-1565791380713-1756b9a05343",
-        "Taiwan":         "photo-1563729784474-d77dbb933a9e",
-        "China":          "photo-1508804185872-d7badad00f7d",
-        "Nepal":          "photo-1544735716-392fe2489ffa",
-        "Sri Lanka":      "photo-1540448051910-09cfadd5df61",
+        "Japan":            "photo-1528360983277-13d401cdc186",
+        "Singapore":        "photo-1525625293386-3f8f99389edd",
+        "South Korea":      "photo-1583833008338-31a6657917ab",
+        "Thailand":         "photo-1528181304800-259b08848526",
+        "India":            "photo-1524492412937-b28074a5d7da",
+        "Vietnam":          "photo-1557750255-c76072a7aad1",
+        "Indonesia":        "photo-1537996194471-e657df975ab4",
+        "Malaysia":         "photo-1596422846543-75c6fc197f11",
+        "Philippines":      "photo-1565791380713-1756b9a05343",
+        "Taiwan":           "photo-1563729784474-d77dbb933a9e",
+        "China":            "photo-1508804185872-d7badad00f7d",
+        "Nepal":            "photo-1544735716-392fe2489ffa",
+        "Sri Lanka":        "photo-1540448051910-09cfadd5df61",
         // Oceania
-        "Australia":      "photo-1506905925346-21bda4d32df4",
-        "New Zealand":    "photo-1507699622108-4be3abd695ad",
-        "Fiji":           "photo-1548574505-5e239809ee19",
+        "Australia":        "photo-1624138784614-87fd1b6528f8",
+        "New Zealand":      "photo-1507699622108-4be3abd695ad",
+        "Fiji":             "photo-1548574505-5e239809ee19",
         // Middle East
-        "UAE":            "photo-1512453979798-5ea266f8880c",
-        "Israel":         "photo-1544132167-0b9bcd6de6a1",
-        "Turkey":         "photo-1524231757912-21f4fe3a7200",
-        "Jordan":         "photo-1548786811-dd6e453ccca7",
-        "Morocco":        "photo-1489749798305-4fea3ae63d43",
-        "Egypt":          "photo-1539768942893-daf53e448371",
-        "Qatar":          "photo-1548605522-c8fa15bc8e4a",
-        "Saudi Arabia":   "photo-1586724237569-f3d0c1dee8c6",
+        "UAE":              "photo-1512453979798-5ea266f8880c",
+        "United Arab Emirates": "photo-1512453979798-5ea266f8880c",
+        "Israel":           "photo-1547483029-77784da27709",
+        "Turkey":           "photo-1524231757912-21f4fe3a7200",
+        "Jordan":           "photo-1548786811-dd6e453ccca7",
+        "Morocco":          "photo-1489749798305-4fea3ae63d43",
+        "Egypt":            "photo-1539768942893-daf53e448371",
+        "Qatar":            "photo-1548605522-c8fa15bc8e4a",
+        "Saudi Arabia":     "photo-1586724237569-f3d0c1dee8c6",
         // Africa
-        "South Africa":   "photo-1516026672322-bc52d61a55d5",
-        "Kenya":          "photo-1547471080-7cc2caa01a7e",
+        "South Africa":     "photo-1516026672322-bc52d61a55d5",
+        "Kenya":            "photo-1547471080-7cc2caa01a7e",
+        "Nigeria":          "photo-1618516976736-3b77d7c28193",
+        "Ethiopia":         "photo-1580060839134-75a5edca2e99",
+        "Ghana":            "photo-1629739885594-96b3e5a4b8c4",
     ]
 
     static func badgeColor(for country: String) -> Color {

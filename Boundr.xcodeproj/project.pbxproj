@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		CB1922112FA7DB0000DC1EFB /* Instrument_Serif.zip in Resources */ = {isa = PBXBuildFile; fileRef = CB1922102FA7DB0000DC1EFB /* Instrument_Serif.zip */; };
 		CB87FF022FA73C5700C4AAAE /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = CB87FF012FA73C5700C4AAAE /* FirebaseAuth */; };
 		CB87FF042FA73F2C00C4AAAE /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = CB87FF032FA73F2C00C4AAAE /* GoogleService-Info.plist */; };
 /* End PBXBuildFile section */
@@ -29,6 +30,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		CB1922102FA7DB0000DC1EFB /* Instrument_Serif.zip */ = {isa = PBXFileReference; lastKnownFileType = archive.zip; path = Instrument_Serif.zip; sourceTree = "<group>"; };
 		CB87FEA02FA6631300C4AAAE /* Boundr.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Boundr.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CB87FEAD2FA6631600C4AAAE /* BoundrTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BoundrTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		CB87FEB72FA6631600C4AAAE /* BoundrUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BoundrUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -89,6 +91,7 @@
 				CB87FEBA2FA6631600C4AAAE /* BoundrUITests */,
 				CB87FEA12FA6631300C4AAAE /* Products */,
 				CB87FF032FA73F2C00C4AAAE /* GoogleService-Info.plist */,
+				CB1922102FA7DB0000DC1EFB /* Instrument_Serif.zip */,
 			);
 			sourceTree = "<group>";
 		};
@@ -227,6 +230,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				CB87FF042FA73F2C00C4AAAE /* GoogleService-Info.plist in Resources */,
+				CB1922112FA7DB0000DC1EFB /* Instrument_Serif.zip in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -412,7 +416,8 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -444,7 +449,8 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

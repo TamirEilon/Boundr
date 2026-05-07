@@ -14,7 +14,7 @@ struct SignUpView: View {
     @State private var errorMessage: String?
     @State private var showSignIn      = false
 
-    private let brandBlue = Color(red: 0.28, green: 0.40, blue: 0.92)
+    private let brandBlue = Color(red: 38/255, green: 99/255, blue: 235/255)
 
     // MARK: - Password rules
 
@@ -41,7 +41,7 @@ struct SignUpView: View {
             VStack(alignment: .leading, spacing: 0) {
                 // Header
                 Text("Create account")
-                    .font(.system(size: 32, weight: .bold, design: .serif))
+                    .font(Font.custom("InstrumentSerif-Regular", size: 36))
                     .padding(.top, 16)
 
                 Text("Fill in your details to get started.")

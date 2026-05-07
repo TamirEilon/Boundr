@@ -5,6 +5,8 @@ struct ProfileView: View {
     @EnvironmentObject var store: VisaStore
     @EnvironmentObject var auth: AuthManager
     @State private var showEditProfile = false
+    @State private var showAbout = false
+    @State private var showSettings = false
 
     var body: some View {
         NavigationStack {
@@ -24,6 +26,12 @@ struct ProfileView: View {
             .background(Color(.systemGroupedBackground))
             .navigationDestination(isPresented: $showEditProfile) {
                 EditProfileView(user: store.user)
+            }
+            .navigationDestination(isPresented: $showAbout) {
+                AboutView()
+            }
+            .navigationDestination(isPresented: $showSettings) {
+                SettingsView()
             }
         }
     }
@@ -99,13 +107,13 @@ struct ProfileView: View {
             Text("Your profile").font(.headline).fontWeight(.bold).padding(.horizontal)
 
             VStack(spacing: 0) {
-                detailRow(icon: "book",                   label: "Education",  value: store.user.educationDisplay)
+                detailRow(icon: "book",                      label: "Education",  value: store.user.educationDisplay)
                 Divider().padding(.leading, 44)
-                detailRow(icon: "briefcase",              label: "Occupation", value: store.user.occupation)
+                detailRow(icon: "briefcase",                 label: "Occupation", value: store.user.occupation)
                 Divider().padding(.leading, 44)
                 detailRow(icon: "chart.line.uptrend.xyaxis", label: "Experience", value: "\(store.user.experienceYears) years")
                 Divider().padding(.leading, 44)
-                detailRow(icon: "character.book.closed",  label: "Languages",  value: store.user.languages)
+                detailRow(icon: "heart",                     label: "Marital status", value: store.user.maritalStatusDisplay)
             }
             .background(Color(.systemBackground))
             .cornerRadius(16)
@@ -129,24 +137,26 @@ struct ProfileView: View {
     private var actionsList: some View {
         VStack(spacing: 0) {
             Button { showEditProfile = true } label: {
-                actionRow(icon: "pencil", title: "Edit profile", subtitle: "Update what we match against", badge: nil)
+                actionRow(icon: "pencil", title: "Edit profile", subtitle: "Update what we match against")
             }
             .buttonStyle(.plain)
             Divider().padding(.leading, 56)
-            actionRow(icon: "bell",         title: "Notifications",         subtitle: "3 new alerts",                  badge: 3)
+            Button { showSettings = true } label: {
+                actionRow(icon: "gearshape", title: "Settings", subtitle: "Notifications, privacy & more")
+            }
+            .buttonStyle(.plain)
             Divider().padding(.leading, 56)
-            actionRow(icon: "gearshape",    title: "Settings & Preferences", subtitle: "Currency, units, language",    badge: nil)
-            Divider().padding(.leading, 56)
-            actionRow(icon: "shield",       title: "Privacy & Data",         subtitle: "Control what we store",        badge: nil)
-            Divider().padding(.leading, 56)
-            actionRow(icon: "info.circle",  title: "About Boundr",           subtitle: "Version 1.0",                  badge: nil)
+            Button { showAbout = true } label: {
+                actionRow(icon: "info.circle", title: "About Boundr", subtitle: "Version 1.0")
+            }
+            .buttonStyle(.plain)
         }
         .background(Color(.systemBackground))
         .cornerRadius(16)
         .padding(.horizontal)
     }
 
-    private func actionRow(icon: String, title: String, subtitle: String, badge: Int?) -> some View {
+    private func actionRow(icon: String, title: String, subtitle: String) -> some View {
         HStack(spacing: 14) {
             Image(systemName: icon)
                 .font(.system(size: 16)).foregroundColor(.primary)
@@ -159,13 +169,6 @@ struct ProfileView: View {
             }
 
             Spacer()
-
-            if let badge {
-                Text("\(badge)")
-                    .font(.caption).fontWeight(.bold).foregroundColor(.white)
-                    .padding(.horizontal, 8).padding(.vertical, 4)
-                    .background(Color.blue).clipShape(Capsule())
-            }
 
             Image(systemName: "chevron.right")
                 .font(.caption).foregroundColor(Color(.systemGray3))

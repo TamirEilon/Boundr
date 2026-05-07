@@ -37,15 +37,30 @@ struct OnboardingView: View {
 
     // Collected answers
     @State private var selectedNationalities: Set<String> = ["American"]
+    @State private var countrySearch = ""
+    @State private var residenceCountry = ""
+    @State private var residenceSearch = ""
     @State private var age: Double     = 28
     @State private var education       = "masters"
     @State private var occupation      = "Software Engineer"
+    @State private var otherOccupation = ""
     @State private var experience: Double = 4
+    @State private var relationshipStatus = "single"
+    @State private var numberOfKids = 0
 
-    private let totalSteps = 6
+    private let totalSteps = 8
 
     private var firstName: String {
         auth.currentUser?.displayName?.components(separatedBy: " ").first ?? "there"
+    }
+
+    private var canAdvance: Bool {
+        switch step {
+        case 0: return !selectedNationalities.isEmpty
+        case 1: return !residenceCountry.isEmpty
+        case 4: return occupation != "Other" || !otherOccupation.trimmingCharacters(in: .whitespaces).isEmpty
+        default: return true
+        }
     }
 
     var body: some View {
@@ -76,10 +91,12 @@ struct OnboardingView: View {
                     VStack(alignment: .leading, spacing: 0) {
                         switch step {
                         case 0: nationalityStep
-                        case 1: ageStep
-                        case 2: educationStep
-                        case 3: occupationStep
-                        case 4: experienceStep
+                        case 1: residenceStep
+                        case 2: ageStep
+                        case 3: educationStep
+                        case 4: occupationStep
+                        case 5: experienceStep
+                        case 6: maritalStatusStep
                         default: summaryStep
                         }
                     }
@@ -101,9 +118,10 @@ struct OnboardingView: View {
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 18)
-                    .background(Color.black)
+                    .background(canAdvance ? Color.black : Color(.systemGray4))
                     .cornerRadius(16)
                 }
+                .disabled(!canAdvance)
                 .padding(.horizontal, 24)
                 .padding(.vertical, 20)
             }
@@ -130,27 +148,206 @@ struct OnboardingView: View {
     // MARK: - Step 1: Nationality
 
     private let countries: [(code: String, name: String, nationality: String)] = [
-        ("US", "United States",  "American"),
-        ("GB", "United Kingdom", "British"),
-        ("CA", "Canada",         "Canadian"),
-        ("DE", "Germany",        "German"),
-        ("FR", "France",         "French"),
-        ("IN", "India",          "Indian"),
-        ("BR", "Brazil",         "Brazilian"),
-        ("AU", "Australia",      "Australian"),
-        ("JP", "Japan",          "Japanese"),
-        ("MX", "Mexico",         "Mexican"),
-        ("ZA", "South Africa",   "South African"),
-        ("NG", "Nigeria",        "Nigerian"),
-        ("ES", "Spain",          "Spanish"),
-        ("IT", "Italy",          "Italian"),
-        ("NL", "Netherlands",    "Dutch"),
-        ("SE", "Sweden",         "Swedish"),
-        ("KR", "South Korea",    "South Korean"),
-        ("SG", "Singapore",      "Singaporean"),
-        ("IL", "Israel",         "Israeli"),
-        ("PL", "Poland",         "Polish"),
+        ("AF", "Afghanistan",           "Afghan"),
+        ("AL", "Albania",               "Albanian"),
+        ("DZ", "Algeria",               "Algerian"),
+        ("AD", "Andorra",               "Andorran"),
+        ("AO", "Angola",                "Angolan"),
+        ("AG", "Antigua & Barbuda",     "Antiguan"),
+        ("AR", "Argentina",             "Argentine"),
+        ("AM", "Armenia",               "Armenian"),
+        ("AU", "Australia",             "Australian"),
+        ("AT", "Austria",               "Austrian"),
+        ("AZ", "Azerbaijan",            "Azerbaijani"),
+        ("BS", "Bahamas",               "Bahamian"),
+        ("BH", "Bahrain",               "Bahraini"),
+        ("BD", "Bangladesh",            "Bangladeshi"),
+        ("BB", "Barbados",              "Barbadian"),
+        ("BY", "Belarus",               "Belarusian"),
+        ("BE", "Belgium",               "Belgian"),
+        ("BZ", "Belize",                "Belizean"),
+        ("BJ", "Benin",                 "Beninese"),
+        ("BT", "Bhutan",                "Bhutanese"),
+        ("BO", "Bolivia",               "Bolivian"),
+        ("BA", "Bosnia & Herzegovina",  "Bosnian"),
+        ("BW", "Botswana",              "Botswanan"),
+        ("BR", "Brazil",                "Brazilian"),
+        ("BN", "Brunei",                "Bruneian"),
+        ("BG", "Bulgaria",              "Bulgarian"),
+        ("BF", "Burkina Faso",          "Burkinabé"),
+        ("BI", "Burundi",               "Burundian"),
+        ("KH", "Cambodia",              "Cambodian"),
+        ("CM", "Cameroon",              "Cameroonian"),
+        ("CA", "Canada",                "Canadian"),
+        ("CV", "Cape Verde",            "Cape Verdean"),
+        ("CF", "Central African Rep.",  "Central African"),
+        ("TD", "Chad",                  "Chadian"),
+        ("CL", "Chile",                 "Chilean"),
+        ("CN", "China",                 "Chinese"),
+        ("CO", "Colombia",              "Colombian"),
+        ("KM", "Comoros",               "Comorian"),
+        ("CD", "DR Congo",              "Congolese"),
+        ("CG", "Republic of Congo",     "Congolese"),
+        ("CR", "Costa Rica",            "Costa Rican"),
+        ("HR", "Croatia",               "Croatian"),
+        ("CU", "Cuba",                  "Cuban"),
+        ("CY", "Cyprus",                "Cypriot"),
+        ("CZ", "Czech Republic",        "Czech"),
+        ("DK", "Denmark",               "Danish"),
+        ("DJ", "Djibouti",              "Djiboutian"),
+        ("DM", "Dominica",              "Dominican"),
+        ("DO", "Dominican Republic",    "Dominican"),
+        ("EC", "Ecuador",               "Ecuadorian"),
+        ("EG", "Egypt",                 "Egyptian"),
+        ("SV", "El Salvador",           "Salvadoran"),
+        ("GQ", "Equatorial Guinea",     "Equatoguinean"),
+        ("ER", "Eritrea",               "Eritrean"),
+        ("EE", "Estonia",               "Estonian"),
+        ("SZ", "Eswatini",              "Swazi"),
+        ("ET", "Ethiopia",              "Ethiopian"),
+        ("FJ", "Fiji",                  "Fijian"),
+        ("FI", "Finland",               "Finnish"),
+        ("FR", "France",                "French"),
+        ("GA", "Gabon",                 "Gabonese"),
+        ("GM", "Gambia",                "Gambian"),
+        ("GE", "Georgia",               "Georgian"),
+        ("DE", "Germany",               "German"),
+        ("GH", "Ghana",                 "Ghanaian"),
+        ("GR", "Greece",                "Greek"),
+        ("GD", "Grenada",               "Grenadian"),
+        ("GT", "Guatemala",             "Guatemalan"),
+        ("GN", "Guinea",                "Guinean"),
+        ("GW", "Guinea-Bissau",         "Bissau-Guinean"),
+        ("GY", "Guyana",                "Guyanese"),
+        ("HT", "Haiti",                 "Haitian"),
+        ("HN", "Honduras",              "Honduran"),
+        ("HU", "Hungary",               "Hungarian"),
+        ("IS", "Iceland",               "Icelandic"),
+        ("IN", "India",                 "Indian"),
+        ("ID", "Indonesia",             "Indonesian"),
+        ("IR", "Iran",                  "Iranian"),
+        ("IQ", "Iraq",                  "Iraqi"),
+        ("IE", "Ireland",               "Irish"),
+        ("IL", "Israel",                "Israeli"),
+        ("IT", "Italy",                 "Italian"),
+        ("JM", "Jamaica",               "Jamaican"),
+        ("JP", "Japan",                 "Japanese"),
+        ("JO", "Jordan",                "Jordanian"),
+        ("KZ", "Kazakhstan",            "Kazakhstani"),
+        ("KE", "Kenya",                 "Kenyan"),
+        ("KI", "Kiribati",              "I-Kiribati"),
+        ("KW", "Kuwait",                "Kuwaiti"),
+        ("KG", "Kyrgyzstan",            "Kyrgyz"),
+        ("LA", "Laos",                  "Lao"),
+        ("LV", "Latvia",                "Latvian"),
+        ("LB", "Lebanon",               "Lebanese"),
+        ("LS", "Lesotho",               "Basotho"),
+        ("LR", "Liberia",               "Liberian"),
+        ("LY", "Libya",                 "Libyan"),
+        ("LI", "Liechtenstein",         "Liechtensteiner"),
+        ("LT", "Lithuania",             "Lithuanian"),
+        ("LU", "Luxembourg",            "Luxembourgish"),
+        ("MG", "Madagascar",            "Malagasy"),
+        ("MW", "Malawi",                "Malawian"),
+        ("MY", "Malaysia",              "Malaysian"),
+        ("MV", "Maldives",              "Maldivian"),
+        ("ML", "Mali",                  "Malian"),
+        ("MT", "Malta",                 "Maltese"),
+        ("MH", "Marshall Islands",      "Marshallese"),
+        ("MR", "Mauritania",            "Mauritanian"),
+        ("MU", "Mauritius",             "Mauritian"),
+        ("MX", "Mexico",                "Mexican"),
+        ("FM", "Micronesia",            "Micronesian"),
+        ("MD", "Moldova",               "Moldovan"),
+        ("MC", "Monaco",                "Monégasque"),
+        ("MN", "Mongolia",              "Mongolian"),
+        ("ME", "Montenegro",            "Montenegrin"),
+        ("MA", "Morocco",               "Moroccan"),
+        ("MZ", "Mozambique",            "Mozambican"),
+        ("MM", "Myanmar",               "Burmese"),
+        ("NA", "Namibia",               "Namibian"),
+        ("NR", "Nauru",                 "Nauruan"),
+        ("NP", "Nepal",                 "Nepali"),
+        ("NL", "Netherlands",           "Dutch"),
+        ("NZ", "New Zealand",           "New Zealander"),
+        ("NI", "Nicaragua",             "Nicaraguan"),
+        ("NE", "Niger",                 "Nigerien"),
+        ("NG", "Nigeria",               "Nigerian"),
+        ("MK", "North Macedonia",       "Macedonian"),
+        ("NO", "Norway",                "Norwegian"),
+        ("OM", "Oman",                  "Omani"),
+        ("PK", "Pakistan",              "Pakistani"),
+        ("PW", "Palau",                 "Palauan"),
+        ("PA", "Panama",                "Panamanian"),
+        ("PG", "Papua New Guinea",      "Papua New Guinean"),
+        ("PY", "Paraguay",              "Paraguayan"),
+        ("PE", "Peru",                  "Peruvian"),
+        ("PH", "Philippines",           "Filipino"),
+        ("PL", "Poland",                "Polish"),
+        ("PT", "Portugal",              "Portuguese"),
+        ("QA", "Qatar",                 "Qatari"),
+        ("RO", "Romania",               "Romanian"),
+        ("RU", "Russia",                "Russian"),
+        ("RW", "Rwanda",                "Rwandan"),
+        ("KN", "Saint Kitts & Nevis",   "Kittitian"),
+        ("LC", "Saint Lucia",           "Saint Lucian"),
+        ("VC", "Saint Vincent",         "Vincentian"),
+        ("WS", "Samoa",                 "Samoan"),
+        ("SM", "San Marino",            "Sammarinese"),
+        ("ST", "São Tomé & Príncipe",   "São Toméan"),
+        ("SA", "Saudi Arabia",          "Saudi"),
+        ("SN", "Senegal",               "Senegalese"),
+        ("RS", "Serbia",                "Serbian"),
+        ("SC", "Seychelles",            "Seychellois"),
+        ("SL", "Sierra Leone",          "Sierra Leonean"),
+        ("SG", "Singapore",             "Singaporean"),
+        ("SK", "Slovakia",              "Slovak"),
+        ("SI", "Slovenia",              "Slovenian"),
+        ("SB", "Solomon Islands",       "Solomon Islander"),
+        ("SO", "Somalia",               "Somali"),
+        ("ZA", "South Africa",          "South African"),
+        ("SS", "South Sudan",           "South Sudanese"),
+        ("ES", "Spain",                 "Spanish"),
+        ("LK", "Sri Lanka",             "Sri Lankan"),
+        ("SD", "Sudan",                 "Sudanese"),
+        ("SR", "Suriname",              "Surinamese"),
+        ("SE", "Sweden",                "Swedish"),
+        ("CH", "Switzerland",           "Swiss"),
+        ("SY", "Syria",                 "Syrian"),
+        ("TW", "Taiwan",                "Taiwanese"),
+        ("TJ", "Tajikistan",            "Tajik"),
+        ("TZ", "Tanzania",              "Tanzanian"),
+        ("TH", "Thailand",              "Thai"),
+        ("TL", "Timor-Leste",           "Timorese"),
+        ("TG", "Togo",                  "Togolese"),
+        ("TO", "Tonga",                 "Tongan"),
+        ("TT", "Trinidad & Tobago",     "Trinidadian"),
+        ("TN", "Tunisia",               "Tunisian"),
+        ("TR", "Turkey",                "Turkish"),
+        ("TM", "Turkmenistan",          "Turkmen"),
+        ("TV", "Tuvalu",                "Tuvaluan"),
+        ("UG", "Uganda",                "Ugandan"),
+        ("UA", "Ukraine",               "Ukrainian"),
+        ("AE", "United Arab Emirates",  "Emirati"),
+        ("GB", "United Kingdom",        "British"),
+        ("US", "United States",         "American"),
+        ("UY", "Uruguay",               "Uruguayan"),
+        ("UZ", "Uzbekistan",            "Uzbek"),
+        ("VU", "Vanuatu",               "Ni-Vanuatu"),
+        ("VE", "Venezuela",             "Venezuelan"),
+        ("VN", "Vietnam",               "Vietnamese"),
+        ("YE", "Yemen",                 "Yemeni"),
+        ("ZM", "Zambia",                "Zambian"),
+        ("ZW", "Zimbabwe",              "Zimbabwean"),
     ]
+
+    private var filteredCountries: [(code: String, name: String, nationality: String)] {
+        if countrySearch.isEmpty { return countries }
+        return countries.filter {
+            $0.name.localizedCaseInsensitiveContains(countrySearch) ||
+            $0.nationality.localizedCaseInsensitiveContains(countrySearch)
+        }
+    }
 
     private var nationalityStep: some View {
         VStack(alignment: .leading, spacing: 24) {
@@ -190,8 +387,23 @@ struct OnboardingView: View {
                 }
             }
 
+            // Search bar
+            HStack(spacing: 8) {
+                Image(systemName: "magnifyingglass").foregroundColor(.secondary).font(.subheadline)
+                TextField("Search countries", text: $countrySearch)
+                    .font(.subheadline)
+                    .autocorrectionDisabled()
+                if !countrySearch.isEmpty {
+                    Button { countrySearch = "" } label: {
+                        Image(systemName: "xmark.circle.fill").foregroundColor(.secondary)
+                    }
+                }
+            }
+            .padding(.horizontal, 14).padding(.vertical, 12)
+            .background(Color(.systemGray6)).cornerRadius(12)
+
             LazyVGrid(columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)], spacing: 12) {
-                ForEach(countries, id: \.code) { country in
+                ForEach(filteredCountries, id: \.code) { country in
                     let selected = selectedNationalities.contains(country.nationality)
                     let maxReached = selectedNationalities.count >= 3 && !selected
                     Button {
@@ -226,11 +438,74 @@ struct OnboardingView: View {
         .animation(.easeInOut(duration: 0.2), value: selectedNationalities)
     }
 
+    // MARK: - Step 2: Residence Country
+
+    private var filteredResidenceCountries: [(code: String, name: String, nationality: String)] {
+        if residenceSearch.isEmpty { return countries }
+        return countries.filter {
+            $0.name.localizedCaseInsensitiveContains(residenceSearch) ||
+            $0.nationality.localizedCaseInsensitiveContains(residenceSearch)
+        }
+    }
+
+    private var residenceStep: some View {
+        VStack(alignment: .leading, spacing: 24) {
+            stepHeader(
+                title: "Where do you live\ncurrently?",
+                italicWord: "live",
+                subtitle: "We'll show visas you can apply for from your country."
+            )
+
+            // Search bar
+            HStack(spacing: 8) {
+                Image(systemName: "magnifyingglass").foregroundColor(.secondary).font(.subheadline)
+                TextField("Search countries", text: $residenceSearch)
+                    .font(.subheadline)
+                    .autocorrectionDisabled()
+                if !residenceSearch.isEmpty {
+                    Button { residenceSearch = "" } label: {
+                        Image(systemName: "xmark.circle.fill").foregroundColor(.secondary)
+                    }
+                }
+            }
+            .padding(.horizontal, 14).padding(.vertical, 12)
+            .background(Color(.systemGray6)).cornerRadius(12)
+
+            LazyVGrid(columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)], spacing: 12) {
+                ForEach(filteredResidenceCountries, id: \.code) { country in
+                    let selected = residenceCountry == country.name
+                    Button {
+                        residenceCountry = selected ? "" : country.name
+                    } label: {
+                        HStack(spacing: 10) {
+                            Text(country.code)
+                                .font(.caption).fontWeight(.semibold)
+                                .foregroundColor(selected ? .white.opacity(0.7) : Color(.systemGray3))
+                                .frame(width: 28)
+                            Text(country.name)
+                                .font(.subheadline).fontWeight(.medium)
+                                .foregroundColor(selected ? .white : .primary)
+                                .lineLimit(2)
+                                .fixedSize(horizontal: false, vertical: true)
+                            Spacer()
+                        }
+                        .padding(.horizontal, 14).padding(.vertical, 16)
+                        .background(selected ? Color.black : Color(.systemBackground))
+                        .cornerRadius(14)
+                        .overlay(RoundedRectangle(cornerRadius: 14)
+                            .stroke(selected ? Color.clear : Color(.systemGray4), lineWidth: 1))
+                    }
+                }
+            }
+        }
+        .animation(.easeInOut(duration: 0.2), value: residenceCountry)
+    }
+
     // MARK: - Step 2: Age
 
     private var ageStep: some View {
         VStack(alignment: .leading, spacing: 24) {
-            stepHeader(title: "How old are you?", italicWord: nil,
+            stepHeader(title: "How old are you?", italicWord: "old",
                        subtitle: "Some visas have age limits — most cap at 35 or 45.")
             VStack(spacing: 6) {
                 Text("\(Int(age))")
@@ -265,7 +540,7 @@ struct OnboardingView: View {
 
     private var educationStep: some View {
         VStack(alignment: .leading, spacing: 24) {
-            stepHeader(title: "Highest education?", italicWord: nil,
+            stepHeader(title: "Highest education?", italicWord: "education",
                        subtitle: "Degrees unlock skilled-worker routes.")
             VStack(spacing: 10) {
                 ForEach(educationOptions, id: \.key) { option in
@@ -295,16 +570,20 @@ struct OnboardingView: View {
     // MARK: - Step 4: Occupation
 
     private let occupationOptions = [
-        "Software Engineer", "Designer",
-        "Product Manager",   "Data Scientist",
-        "Doctor / Nurse",    "Teacher / Researcher",
-        "Marketing",         "Finance",
-        "Founder / Self-employed", "Other",
+        "Software Engineer",       "Designer / Creative",
+        "Product Manager",         "Data Scientist / AI",
+        "Doctor / Nurse",          "Teacher / Researcher",
+        "Lawyer / Legal",          "Accountant / Finance",
+        "Marketing / PR",          "Sales / Business Dev",
+        "Engineer (non-software)", "Architect",
+        "Journalist / Writer",     "Artist / Musician",
+        "Founder / Self-employed", "Student",
+        "Retired",                 "Other",
     ]
 
     private var occupationStep: some View {
         VStack(alignment: .leading, spacing: 24) {
-            stepHeader(title: "What do you do?", italicWord: nil,
+            stepHeader(title: "What is your work?", italicWord: "work",
                        subtitle: "Your field shapes which talent visas apply.")
             LazyVGrid(columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)], spacing: 12) {
                 ForEach(occupationOptions, id: \.self) { option in
@@ -314,7 +593,7 @@ struct OnboardingView: View {
                             .font(.subheadline).fontWeight(.medium)
                             .foregroundColor(selected ? .white : .primary)
                             .multilineTextAlignment(.leading)
-                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .frame(maxWidth: .infinity, minHeight: 56, alignment: .leading)
                             .padding(.horizontal, 14).padding(.vertical, 16)
                             .background(selected ? Color.black : Color(.systemBackground))
                             .cornerRadius(14)
@@ -323,14 +602,29 @@ struct OnboardingView: View {
                     }
                 }
             }
+
+            if occupation == "Other" {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("What's your job title?")
+                        .font(.subheadline).fontWeight(.medium)
+                    TextField("e.g. Geologist, Pilot, Chef…", text: $otherOccupation)
+                        .font(.subheadline)
+                        .padding(.horizontal, 16).padding(.vertical, 16)
+                        .background(Color(.systemBackground))
+                        .cornerRadius(14)
+                        .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color(.systemGray4), lineWidth: 1))
+                }
+                .transition(.opacity.combined(with: .move(edge: .top)))
+            }
         }
+        .animation(.easeInOut(duration: 0.2), value: occupation)
     }
 
     // MARK: - Step 5: Experience
 
     private var experienceStep: some View {
         VStack(alignment: .leading, spacing: 24) {
-            stepHeader(title: "Years of experience?", italicWord: nil,
+            stepHeader(title: "Years of experience?", italicWord: "experience",
                        subtitle: "Most skilled visas require 2–5 years in your field.")
             VStack(spacing: 6) {
                 Text("\(Int(experience))")
@@ -354,6 +648,82 @@ struct OnboardingView: View {
     }
 
     // MARK: - Step 6: Summary
+
+    // MARK: - Step 7: Marital Status
+
+    private let relationshipOptions: [(key: String, label: String)] = [
+        ("single",            "Single"),
+        ("in_a_relationship", "In a relationship"),
+        ("married",           "Married"),
+        ("divorced",          "Divorced"),
+        ("widowed",           "Widowed"),
+    ]
+
+    private var maritalStatusStep: some View {
+        VStack(alignment: .leading, spacing: 24) {
+            stepHeader(title: "What's your\nrelationship status?",
+                       italicWord: "relationship",
+                       subtitle: "Some family and partner visas depend on this.")
+
+            VStack(spacing: 10) {
+                ForEach(relationshipOptions, id: \.key) { option in
+                    let selected = relationshipStatus == option.key
+                    Button { relationshipStatus = option.key } label: {
+                        HStack {
+                            Text(option.label)
+                                .font(.subheadline).fontWeight(.medium)
+                                .foregroundColor(selected ? .white : .primary)
+                            Spacer()
+                            if selected {
+                                Image(systemName: "checkmark")
+                                    .font(.system(size: 13, weight: .semibold))
+                                    .foregroundColor(.white)
+                            }
+                        }
+                        .padding(.horizontal, 18).padding(.vertical, 18)
+                        .background(selected ? Color.black : Color(.systemBackground))
+                        .cornerRadius(14)
+                        .overlay(RoundedRectangle(cornerRadius: 14)
+                            .stroke(selected ? Color.clear : Color(.systemGray4), lineWidth: 1))
+                    }
+                }
+            }
+
+            if relationshipStatus != "single" {
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("How many kids do you have?")
+                        .font(.subheadline).fontWeight(.medium)
+
+                    HStack(spacing: 0) {
+                        Button {
+                            if numberOfKids > 0 { numberOfKids -= 1 }
+                        } label: {
+                            Image(systemName: "minus")
+                                .font(.system(size: 16, weight: .semibold))
+                                .frame(width: 56, height: 56)
+                                .foregroundColor(numberOfKids == 0 ? Color(.systemGray3) : .primary)
+                        }
+                        Text("\(numberOfKids)")
+                            .font(.title2).fontWeight(.semibold)
+                            .frame(maxWidth: .infinity)
+                        Button {
+                            numberOfKids += 1
+                        } label: {
+                            Image(systemName: "plus")
+                                .font(.system(size: 16, weight: .semibold))
+                                .frame(width: 56, height: 56)
+                                .foregroundColor(.primary)
+                        }
+                    }
+                    .background(Color(.systemBackground))
+                    .cornerRadius(14)
+                    .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color(.systemGray4), lineWidth: 1))
+                }
+                .transition(.opacity.combined(with: .move(edge: .top)))
+            }
+        }
+        .animation(.easeInOut(duration: 0.2), value: relationshipStatus)
+    }
 
     private var summaryStep: some View {
         VStack(alignment: .leading, spacing: 24) {
@@ -388,7 +758,9 @@ struct OnboardingView: View {
 
             // Summary card
             VStack(spacing: 0) {
-                summaryRow("Passport", countries.filter { selectedNationalities.contains($0.nationality) }.map(\.name).joined(separator: ", "))
+                summaryRow("Passport",  countries.filter { selectedNationalities.contains($0.nationality) }.map(\.name).joined(separator: ", "))
+                Divider().padding(.leading, 16)
+                summaryRow("Lives in",  residenceCountry)
                 Divider().padding(.leading, 16)
                 summaryRow("Age",        "\(Int(age))")
                 Divider().padding(.leading, 16)
@@ -397,6 +769,8 @@ struct OnboardingView: View {
                 summaryRow("Occupation", occupation)
                 Divider().padding(.leading, 16)
                 summaryRow("Experience", "\(Int(experience)) years")
+                Divider().padding(.leading, 16)
+                summaryRow("Status", relationshipOptions.first { $0.key == relationshipStatus }?.label ?? relationshipStatus)
             }
             .background(Color(.systemGray6))
             .cornerRadius(16)
@@ -423,7 +797,7 @@ struct OnboardingView: View {
                 let before = String(title[title.startIndex..<range.lowerBound])
                 let after  = String(title[range.upperBound...])
                 (Text(before).font(.system(size: 34, weight: .bold))
-                 + Text(word).font(.system(size: 34, weight: .regular, design: .serif)).italic()
+                 + Text(word).font(Font.custom("InstrumentSerif-Italic", size: 36))
                  + Text(after).font(.system(size: 34, weight: .bold)))
                 .fixedSize(horizontal: false, vertical: true)
             } else {
@@ -452,9 +826,12 @@ struct OnboardingView: View {
 
     private func commitToStore() {
         store.user.nationalities   = Array(selectedNationalities)
+        store.user.homeCountry     = residenceCountry
         store.user.age             = Int(age)
         store.user.educationLevel  = education
-        store.user.occupation      = occupation
-        store.user.experienceYears = Int(experience)
+        store.user.occupation      = occupation == "Other" ? otherOccupation : occupation
+        store.user.experienceYears    = Int(experience)
+        store.user.relationshipStatus = relationshipStatus
+        store.user.numberOfKids       = numberOfKids
     }
 }

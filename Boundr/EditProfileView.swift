@@ -5,18 +5,65 @@ struct EditProfileView: View {
     @Environment(\.dismiss) var dismiss
 
     @State private var draft: UserProfile
+    @State private var otherOccupation: String = ""
 
     init(user: UserProfile) {
         _draft = State(initialValue: user)
+        let isOther = !["Software Engineer","Designer","Product Manager","Data Scientist",
+                        "Marketing","Sales","Teacher","Doctor","Lawyer","Accountant",
+                        "Consultant","Entrepreneur","Freelancer","Student"].contains(user.occupation)
+        if isOther && !user.occupation.isEmpty {
+            _draft = State(initialValue: {
+                var u = user; u.occupation = "Other"; return u
+            }())
+            _otherOccupation = State(initialValue: user.occupation)
+        }
     }
 
+    private let allCountries = [
+        "Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Argentina", "Armenia",
+        "Australia", "Austria", "Azerbaijan", "Bahamas", "Bahrain", "Bangladesh", "Belarus",
+        "Belgium", "Belize", "Bolivia", "Bosnia & Herzegovina", "Botswana", "Brazil", "Brunei",
+        "Bulgaria", "Cambodia", "Cameroon", "Canada", "Chile", "China", "Colombia",
+        "Costa Rica", "Croatia", "Cuba", "Cyprus", "Czech Republic", "Denmark", "Ecuador",
+        "Egypt", "El Salvador", "Estonia", "Ethiopia", "Finland", "France", "Georgia",
+        "Germany", "Ghana", "Greece", "Guatemala", "Honduras", "Hungary", "Iceland", "India",
+        "Indonesia", "Iran", "Iraq", "Ireland", "Israel", "Italy", "Jamaica", "Japan",
+        "Jordan", "Kazakhstan", "Kenya", "Kuwait", "Laos", "Latvia", "Lebanon", "Libya",
+        "Lithuania", "Luxembourg", "Malaysia", "Malta", "Mexico", "Moldova", "Mongolia",
+        "Morocco", "Mozambique", "Myanmar", "Nepal", "Netherlands", "New Zealand", "Nigeria",
+        "North Macedonia", "Norway", "Oman", "Pakistan", "Panama", "Paraguay", "Peru",
+        "Philippines", "Poland", "Portugal", "Qatar", "Romania", "Russia", "Rwanda",
+        "Saudi Arabia", "Senegal", "Serbia", "Singapore", "Slovakia", "Slovenia",
+        "South Africa", "South Korea", "Spain", "Sri Lanka", "Sudan", "Sweden", "Switzerland",
+        "Syria", "Taiwan", "Tanzania", "Thailand", "Tunisia", "Turkey", "UAE",
+        "Uganda", "Ukraine", "United Kingdom", "United States", "Uruguay", "Uzbekistan",
+        "Venezuela", "Vietnam", "Yemen", "Zambia", "Zimbabwe"
+    ]
+
     private let nationalities = [
-        "American", "British", "Canadian", "Australian", "German", "French",
-        "Spanish", "Italian", "Dutch", "Swedish", "Norwegian", "Danish",
-        "Finnish", "Irish", "Portuguese", "Greek", "Polish", "Austrian",
-        "Belgian", "Swiss", "New Zealander", "Japanese", "South Korean",
-        "Singaporean", "Indian", "Brazilian", "Mexican", "Argentine", "Israeli",
-        "South African", "Other"
+        "Afghan", "Albanian", "Algerian", "Andorran", "Angolan", "Argentine", "Armenian",
+        "Australian", "Austrian", "Azerbaijani", "Bahamian", "Bahraini", "Bangladeshi",
+        "Belarusian", "Belgian", "Belizean", "Bolivian", "Bosnian", "Botswanan", "Brazilian",
+        "Bruneian", "Bulgarian", "Cambodian", "Cameroonian", "Canadian", "Cape Verdean",
+        "Chilean", "Chinese", "Colombian", "Costa Rican", "Croatian", "Cuban", "Cypriot",
+        "Czech", "Danish", "Ecuadorian", "Egyptian", "Salvadoran", "Estonian", "Ethiopian",
+        "Finnish", "French", "Gabonese", "Gambian", "Georgian", "German", "Ghanaian",
+        "Greek", "Guatemalan", "Guinean", "Haitian", "Honduran", "Hungarian", "Icelandic",
+        "Indian", "Indonesian", "Iranian", "Iraqi", "Irish", "Israeli", "Italian",
+        "Jamaican", "Japanese", "Jordanian", "Kazakhstani", "Kenyan", "Kuwaiti", "Lao",
+        "Latvian", "Lebanese", "Libyan", "Lithuanian", "Luxembourgish", "Malagasy",
+        "Malawian", "Malaysian", "Maldivian", "Malian", "Maltese", "Mauritanian",
+        "Mauritian", "Mexican", "Moldovan", "Mongolian", "Montenegrin", "Moroccan",
+        "Mozambican", "Namibian", "Nepali", "Dutch", "New Zealander", "Nicaraguan",
+        "Nigerien", "Nigerian", "Macedonian", "Norwegian", "Omani", "Pakistani",
+        "Panamanian", "Paraguayan", "Peruvian", "Filipino", "Polish", "Portuguese",
+        "Qatari", "Romanian", "Russian", "Rwandan", "Saudi", "Senegalese", "Serbian",
+        "Singaporean", "Slovak", "Slovenian", "Somali", "South African", "South Korean",
+        "Spanish", "Sri Lankan", "Sudanese", "Swedish", "Swiss", "Syrian", "Taiwanese",
+        "Tajik", "Tanzanian", "Thai", "Tunisian", "Turkish", "Turkmen", "Ugandan",
+        "Ukrainian", "Emirati", "British", "American", "Uruguayan", "Uzbek",
+        "Venezuelan", "Vietnamese", "Yemeni", "Zambian", "Zimbabwean"
     ]
 
     private let educationOptions: [(key: String, label: String)] = [
@@ -46,6 +93,10 @@ struct EditProfileView: View {
                     nationalityField
                 }
 
+                formField(label: "Where do you live?") {
+                    homeCountryField
+                }
+
                 formField(label: "Age") {
                     textRow(value: intBinding(\.age), keyboard: .numberPad)
                 }
@@ -57,9 +108,22 @@ struct EditProfileView: View {
                 }
 
                 formField(label: "Occupation") {
-                    pickerRow(selection: $draft.occupation,
-                              options: occupationOptions,
-                              display: { $0 })
+                    VStack(alignment: .leading, spacing: 10) {
+                        pickerRow(selection: $draft.occupation,
+                                  options: occupationOptions,
+                                  display: { $0 })
+                        if draft.occupation == "Other" {
+                            TextField("Job title", text: $otherOccupation)
+                                .font(.body)
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 16)
+                                .background(Color(.systemBackground))
+                                .cornerRadius(16)
+                                .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color(.systemGray5), lineWidth: 1))
+                                .transition(.opacity.combined(with: .move(edge: .top)))
+                        }
+                    }
+                    .animation(.easeInOut(duration: 0.2), value: draft.occupation)
                 }
 
                 formField(label: "Years of experience") {
@@ -69,12 +133,43 @@ struct EditProfileView: View {
                 formField(label: "Relationship status") {
                     relationshipGrid
                 }
+
+                if draft.relationshipStatus != "single" {
+                    formField(label: "Number of kids") {
+                        HStack(spacing: 0) {
+                            Button {
+                                if draft.numberOfKids > 0 { draft.numberOfKids -= 1 }
+                            } label: {
+                                Image(systemName: "minus")
+                                    .font(.system(size: 16, weight: .semibold))
+                                    .frame(width: 52, height: 52)
+                                    .foregroundColor(draft.numberOfKids == 0 ? Color(.systemGray3) : .primary)
+                            }
+                            Text("\(draft.numberOfKids)")
+                                .font(.title3).fontWeight(.semibold)
+                                .frame(maxWidth: .infinity)
+                            Button {
+                                draft.numberOfKids += 1
+                            } label: {
+                                Image(systemName: "plus")
+                                    .font(.system(size: 16, weight: .semibold))
+                                    .frame(width: 52, height: 52)
+                                    .foregroundColor(.primary)
+                            }
+                        }
+                        .background(Color(.systemBackground))
+                        .cornerRadius(16)
+                        .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color(.systemGray5), lineWidth: 1))
+                    }
+                    .transition(.opacity.combined(with: .move(edge: .top)))
+                }
             }
             .padding(.horizontal, 20)
             .padding(.top, 16)
             .padding(.bottom, 40)
+            .animation(.easeInOut(duration: 0.2), value: draft.relationshipStatus)
         }
-        .background(Color(.systemGroupedBackground))
+        .background(Color(.systemBackground))
         .navigationBarBackButtonHidden(true)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
@@ -92,7 +187,11 @@ struct EditProfileView: View {
             }
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button("Save") {
-                    store.user = draft
+                    var saved = draft
+                    if saved.occupation == "Other" && !otherOccupation.trimmingCharacters(in: .whitespaces).isEmpty {
+                        saved.occupation = otherOccupation.trimmingCharacters(in: .whitespaces)
+                    }
+                    store.user = saved
                     dismiss()
                 }
                 .font(.subheadline).fontWeight(.semibold)
@@ -104,10 +203,10 @@ struct EditProfileView: View {
 
     @ViewBuilder
     private func formField(label: String, @ViewBuilder content: () -> some View) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 10) {
             Text(label)
-                .font(.subheadline)
-                .foregroundColor(.secondary)
+                .font(.caption)
+                .foregroundColor(Color(.systemGray))
             content()
         }
     }
@@ -122,7 +221,7 @@ struct EditProfileView: View {
         } label: {
             HStack {
                 Text(display(selection.wrappedValue))
-                    .font(.body)
+                    .font(.subheadline).fontWeight(.semibold)
                     .foregroundColor(.primary)
                 Spacer()
                 Image(systemName: "chevron.down")
@@ -130,22 +229,28 @@ struct EditProfileView: View {
                     .foregroundColor(.secondary)
             }
             .padding(.horizontal, 16)
-            .padding(.vertical, 16)
+            .padding(.vertical, 14)
             .background(Color(.systemBackground))
-            .cornerRadius(12)
-            .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color(.systemGray4), lineWidth: 1))
+            .cornerRadius(16)
+            .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color(.systemGray5), lineWidth: 1))
         }
     }
 
     private func textRow(value: Binding<String>, keyboard: UIKeyboardType) -> some View {
         TextField("", text: value)
-            .font(.body)
+            .font(.subheadline).fontWeight(.semibold)
             .keyboardType(keyboard)
             .padding(.horizontal, 16)
-            .padding(.vertical, 16)
+            .padding(.vertical, 14)
             .background(Color(.systemBackground))
-            .cornerRadius(12)
-            .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color(.systemGray4), lineWidth: 1))
+            .cornerRadius(16)
+            .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color(.systemGray5), lineWidth: 1))
+    }
+
+    private var homeCountryField: some View {
+        pickerRow(selection: $draft.homeCountry,
+                  options: allCountries,
+                  display: { $0 })
     }
 
     private var relationshipGrid: some View {
@@ -160,10 +265,10 @@ struct EditProfileView: View {
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 16)
                         .background(isSelected ? Color.black : Color(.systemBackground))
-                        .cornerRadius(12)
+                        .cornerRadius(16)
                         .overlay(
-                            RoundedRectangle(cornerRadius: 12)
-                                .stroke(isSelected ? Color.clear : Color(.systemGray4), lineWidth: 1)
+                            RoundedRectangle(cornerRadius: 16)
+                                .stroke(isSelected ? Color.clear : Color(.systemGray5), lineWidth: 1)
                         )
                 }
             }
@@ -215,9 +320,9 @@ struct EditProfileView: View {
                     .padding(.horizontal, 16).padding(.vertical, 14)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .background(Color(.systemBackground))
-                    .cornerRadius(12)
-                    .overlay(RoundedRectangle(cornerRadius: 12)
-                        .stroke(Color(.systemGray4), lineWidth: 1))
+                    .cornerRadius(16)
+                    .overlay(RoundedRectangle(cornerRadius: 16)
+                        .stroke(Color(.systemGray5), lineWidth: 1))
                 }
             }
         }
