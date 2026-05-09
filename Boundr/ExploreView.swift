@@ -179,7 +179,7 @@ struct ExploreView: View {
                     LazyVStack(spacing: 12) {
                         ForEach(filteredVisas) { visa in
                             NavigationLink(value: visa) {
-                                VisaListRow(visa: visa, isEligible: store.isEligible(visa))
+                                VisaListRow(visa: visa, eligibility: store.eligibility(visa))
                             }
                             .buttonStyle(.plain)
                         }
@@ -232,7 +232,23 @@ struct ExploreView: View {
 
 struct VisaListRow: View {
     let visa: Visa
-    let isEligible: Bool
+    let eligibility: VisaEligibility
+
+    private var tagColor: Color {
+        switch eligibility {
+        case .eligible:   return .green
+        case .exempt:     return .blue
+        case .ineligible: return .red
+        }
+    }
+
+    private var tagLabel: String {
+        switch eligibility {
+        case .eligible:   return "Eligible"
+        case .exempt:     return "No visa needed"
+        case .ineligible: return "Not eligible"
+        }
+    }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -257,13 +273,13 @@ struct VisaListRow: View {
                 Spacer()
 
                 HStack(spacing: 4) {
-                    Circle().fill(isEligible ? Color.green : Color.red).frame(width: 6, height: 6)
-                    Text(isEligible ? "Eligible" : "Not eligible")
+                    Circle().fill(tagColor).frame(width: 6, height: 6)
+                    Text(tagLabel)
                         .font(.caption).fontWeight(.medium)
-                        .foregroundColor(isEligible ? .green : .red)
+                        .foregroundColor(tagColor)
                 }
                 .padding(.horizontal, 10).padding(.vertical, 5)
-                .background((isEligible ? Color.green : Color.red).opacity(0.1))
+                .background(tagColor.opacity(0.1))
                 .cornerRadius(20)
             }
             .padding(.horizontal, 16).padding(.top, 16)

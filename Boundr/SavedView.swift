@@ -32,7 +32,7 @@ struct SavedView: View {
                         LazyVStack(spacing: 12) {
                             ForEach(store.savedVisas) { visa in
                                 NavigationLink(value: visa) {
-                                    VisaListRow(visa: visa, isEligible: store.isEligible(visa))
+                                    VisaListRow(visa: visa, eligibility: store.eligibility(visa))
                                 }
                                 .buttonStyle(.plain)
                             }

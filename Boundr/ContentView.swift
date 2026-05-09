@@ -163,7 +163,7 @@ struct HomeView: View {
             VStack(spacing: 10) {
                 ForEach(store.recentlyViewedVisas.prefix(5)) { visa in
                     NavigationLink(value: visa) {
-                        WorkingTowardRow(visa: visa, isEligible: store.isEligible(visa)).padding(.horizontal)
+                        WorkingTowardRow(visa: visa, eligibility: store.eligibility(visa)).padding(.horizontal)
                     }
                     .buttonStyle(.plain)
                 }
@@ -331,7 +331,23 @@ struct WorkTowardCard: View {
 
 struct WorkingTowardRow: View {
     let visa: Visa
-    var isEligible: Bool = false
+    var eligibility: VisaEligibility = .ineligible
+
+    private var tagColor: Color {
+        switch eligibility {
+        case .eligible:   return .green
+        case .exempt:     return .blue
+        case .ineligible: return .red
+        }
+    }
+
+    private var tagLabel: String {
+        switch eligibility {
+        case .eligible:   return "Eligible"
+        case .exempt:     return "No visa needed"
+        case .ineligible: return "Not eligible"
+        }
+    }
 
     var body: some View {
         HStack(spacing: 14) {
@@ -351,11 +367,11 @@ struct WorkingTowardRow: View {
 
             Spacer()
 
-            Text(isEligible ? "Eligible" : "Not eligible")
+            Text(tagLabel)
                 .font(.caption).fontWeight(.semibold)
-                .foregroundColor(isEligible ? .green : .red)
+                .foregroundColor(tagColor)
                 .padding(.horizontal, 10).padding(.vertical, 5)
-                .background((isEligible ? Color.green : Color.red).opacity(0.1)).cornerRadius(8)
+                .background(tagColor.opacity(0.1)).cornerRadius(8)
         }
         .padding(14)
         .background(Color(.systemBackground))

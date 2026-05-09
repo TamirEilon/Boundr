@@ -62,12 +62,6 @@ struct ProfileView: View {
             }
 
             Spacer()
-
-            Button { showEditProfile = true } label: {
-                Image(systemName: "pencil")
-                    .font(.system(size: 15)).foregroundColor(.primary)
-                    .padding(10).background(Color(.systemGray6)).clipShape(Circle())
-            }
         }
         .padding(16)
         .background(Color(.systemBackground))
@@ -81,7 +75,7 @@ struct ProfileView: View {
         HStack(spacing: 10) {
             statCard(dot: .green, label: "Eligible",   value: "\(store.eligibleVisas.count)")
             statCard(dot: .red,   label: "Not yet",    value: "\(store.ineligibleVisas.count)")
-            statCard(dot: .blue,  label: "Saved",      value: "\(store.savedVisas.count)")
+            statCard(dot: .blue,  label: "No visa needed", value: "\(store.exemptVisas.count)")
         }
         .padding(.horizontal)
     }
@@ -94,7 +88,7 @@ struct ProfileView: View {
             }
             Text(value).font(.title2).fontWeight(.bold)
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .frame(maxWidth: .infinity, minHeight: 90, alignment: .leading)
         .padding(14)
         .background(Color(.systemBackground))
         .cornerRadius(14)
