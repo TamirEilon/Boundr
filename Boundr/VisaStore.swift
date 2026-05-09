@@ -435,6 +435,89 @@ class VisaStore: ObservableObject {
     // MARK: - CSV Loading
 
     private func loadVisas() {
-        allVisas = Self.bundledVisas
+        guard let url = Bundle.main.url(forResource: "Visa_export", withExtension: "csv"),
+              let raw = try? String(contentsOf: url, encoding: .utf8) else {
+            allVisas = Self.bundledVisas
+            return
+        }
+
+        let rows = parseCSV(raw)
+        // Row 0 = "Visa_export" label, Row 1 = headers, Row 2+ = data
+        let data = rows.dropFirst(2).compactMap { parseVisaRow($0) }
+        allVisas = data.isEmpty ? Self.bundledVisas : data
     }
+
+    // Robust CSV parser — handles quoted fields, escaped inner quotes, embedded commas/newlines
+    private func parseCSV(_ content: String) -> [[String]] {
+        var rows: [[String]] = []
+        var row:  [String]   = []
+        var field = ""
+        var inQuotes = false
+        let chars = Array(content.unicodeScalars)
+        var i = 0
+
+        while i < chars.count {
+            let c = chars[i]
+            if inQuotes {
+                if c == "\"" {
+                    if i + 1 < chars.count && chars[i + 1] == "\"" {
+                        field.append("\""); i += 2; continue
+                    }
+                    inQuotes = false
+                } else {
+                    field.unicodeScalars.append(c)
+                }
+            } else {
+                switch c {
+                case "\"": inQuotes = true
+                case ",":  row.append(field); field = ""
+                case "\n", "\r\n":
+                    row.append(field); field = ""
+                    rows.append(row);  row = []
+                case "\r": break
+                default: field.unicodeScalars.append(c)
+                }
+            }
+            i += 1
+        }
+        if !field.isEmpty || !row.isEmpty { row.append(field); rows.append(row) }
+        return rows
+    }
+
+    private func parseVisaRow(_ fields: [String]) -> Visa? {
+        guard fields.count >= 15 else { return nil }
+        let country = fields[0].trimmed
+        guard !country.isEmpty else { return nil }
+
+        return Visa(
+            id:                    fields[14].trimmed,
+            country:               country,
+            visaType:              fields[1].trimmed,
+            visaName:              fields[2].trimmed,
+            description:           fields[3].trimmed,
+            duration:              fields[4].trimmed,
+            processingTime:        fields[5].trimmed,
+            cost:                  fields[6].trimmed,
+            requirements:          jsonArray(fields[7]),
+            eligibleNationalities: jsonArray(fields[8]),
+            minAge:                Int(fields[9].trimmed),
+            maxAge:                Int(fields[10].trimmed),
+            requiredOccupation:    fields[11].trimmed.nilIfEmpty,
+            requiredEducation:     jsonArray(fields[12]),
+            applicationURL:        fields[13].trimmed
+        )
+    }
+
+    private func jsonArray(_ raw: String) -> [String] {
+        let s = raw.trimmed
+        guard !s.isEmpty, s.hasPrefix("["),
+              let data = s.data(using: .utf8),
+              let arr = try? JSONDecoder().decode([String].self, from: data) else { return [] }
+        return arr
+    }
+}
+
+private extension String {
+    var trimmed: String { trimmingCharacters(in: .whitespaces) }
+    var nilIfEmpty: String? { trimmed.isEmpty ? nil : trimmed }
 }

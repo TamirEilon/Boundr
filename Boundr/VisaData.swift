@@ -93,7 +93,7 @@ extension VisaStore {
             country: "Australia",
             visaType: "work",
             visaName: "Temporary Graduate visa (subclass 485)",
-            description: "Post‑study work visa for recent graduates of eligible Australian programs to live and work in Australia, with stay length based on qualification and stream",
+            description: "Australia's Temporary Graduate Visa Subclass 485 allows international students who have recently completed a qualification at an Australian institution to live, work, and study in Australia on a temporary basis after graduation. The visa is divided into two streams — the Graduate Work stream, for graduates with skills and qualifications in an occupation on a relevant skilled occupation list, and the Post-Study Work stream, for those who have completed a bachelor's degree or higher. Depending on the stream and the location of study, the visa can be granted for between two and six years, giving graduates valuable opportunities to gain Australian work experience after their studies.",
             duration: "2-3 years",
             processingTime: "4-5 months",
             cost: "From AUD 2,300",

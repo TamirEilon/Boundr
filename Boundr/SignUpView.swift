@@ -5,98 +5,116 @@ struct SignUpView: View {
     @EnvironmentObject var auth: AuthManager
     @Environment(\.dismiss) var dismiss
 
-    @State private var firstName       = ""
-    @State private var lastName        = ""
-    @State private var email           = ""
-    @State private var password        = ""
-    @State private var confirmPassword = ""
-    @State private var isLoading       = false
+    @State private var firstName     = ""
+    @State private var lastName      = ""
+    @State private var email         = ""
+    @State private var password      = ""
+    @State private var showPassword  = false
+    @State private var agreedToTerms = false
+    @State private var isLoading     = false
     @State private var errorMessage: String?
-    @State private var showSignIn      = false
+    @State private var showSignIn    = false
 
     private let brandBlue = Color(red: 38/255, green: 99/255, blue: 235/255)
 
-    // MARK: - Password rules
+    private var passwordStrength: Int {
+        var score = 0
+        if password.count >= 8                                               { score += 1 }
+        if password.contains(where: { $0.isUppercase })                      { score += 1 }
+        if password.contains(where: { $0.isNumber })                         { score += 1 }
+        if password.contains(where: { "!@#$%^&*()_+-=[]{}|;:,./<>?".contains($0) }) { score += 1 }
+        return score
+    }
 
-    private var hasMinLength:  Bool { password.count >= 8 }
-    private var hasUppercase:  Bool { password.contains(where: { $0.isUppercase }) }
-    private var hasLowercase:  Bool { password.contains(where: { $0.isLowercase }) }
-    private var hasNumber:     Bool { password.contains(where: { $0.isNumber }) }
-    private var passwordsMatch: Bool { !confirmPassword.isEmpty && password == confirmPassword }
+    private var strengthColor: Color {
+        switch passwordStrength {
+        case 1:  return .red
+        case 2:  return Color(red: 1.0, green: 0.55, blue: 0.0)
+        case 3:  return Color(red: 1.0, green: 0.75, blue: 0.0)
+        case 4:  return .green
+        default: return Color(.systemGray4)
+        }
+    }
 
-    private var passwordValid: Bool {
-        hasMinLength && hasUppercase && hasLowercase && hasNumber
+    private var strengthLabel: String {
+        switch passwordStrength {
+        case 1:  return "Weak"
+        case 2:  return "Fair"
+        case 3:  return "Good"
+        case 4:  return "Strong"
+        default: return ""
+        }
     }
 
     private var formValid: Bool {
         !firstName.trimmingCharacters(in: .whitespaces).isEmpty &&
         !lastName.trimmingCharacters(in: .whitespaces).isEmpty &&
         email.contains("@") &&
-        passwordValid &&
-        passwordsMatch
+        password.count >= 8 &&
+        agreedToTerms
     }
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
-                // Header
-                Text("Create account")
-                    .font(Font.custom("InstrumentSerif-Regular", size: 36))
-                    .padding(.top, 16)
 
-                Text("Fill in your details to get started.")
+                // Title
+                (Text("Find your ")
+                    .font(Font.custom("InstrumentSerif-Regular", size: 42))
+                 + Text("next")
+                    .font(Font.custom("InstrumentSerif-Italic", size: 42))
+                    .foregroundColor(brandBlue)
+                 + Text(" country.")
+                    .font(Font.custom("InstrumentSerif-Regular", size: 42)))
+                    .padding(.top, 8)
+
+                Text("Free to start. We'll match you to visas based on your real profile.")
                     .font(.subheadline).foregroundColor(.secondary)
-                    .padding(.top, 6).padding(.bottom, 36)
+                    .padding(.top, 8).padding(.bottom, 28)
+
+                // Apple
+                SignInWithAppleButton(.signUp) { request in
+                    auth.prepareAppleRequest(request)
+                } onCompletion: { result in
+                    Task { await handleApple(result) }
+                }
+                .frame(height: 52)
+                .clipShape(RoundedRectangle(cornerRadius: 14))
+                .signInWithAppleButtonStyle(.black)
+
+                orDivider.padding(.vertical, 20)
 
                 // Fields
-                VStack(spacing: 14) {
-                    HStack(spacing: 10) {
-                        authField(icon: "person", placeholder: "First name", text: $firstName)
-                        authField(icon: "person", placeholder: "Last name",  text: $lastName)
+                VStack(alignment: .leading, spacing: 14) {
+                    HStack(alignment: .top, spacing: 10) {
+                        labeledField("FIRST NAME", placeholder: "Morgan", text: $firstName, capitalize: true)
+                        labeledField("LAST NAME",  placeholder: "Lee",    text: $lastName,  capitalize: true)
                     }
 
-                    authField(icon: "envelope", placeholder: "Email", text: $email,
-                              keyboard: .emailAddress, contentType: .emailAddress)
+                    labeledField("EMAIL", placeholder: "you@email.com", text: $email,
+                                 keyboard: .emailAddress, contentType: .emailAddress)
 
-                    authField(icon: "lock", placeholder: "Password",
-                              text: $password, isSecure: true, contentType: .newPassword)
+                    VStack(alignment: .leading, spacing: 8) {
+                        labeledSecureField("PASSWORD", placeholder: "At least 8 characters",
+                                           text: $password, isShowing: $showPassword,
+                                           contentType: .newPassword)
 
-                    // Password requirements (2×2 grid)
-                    if !password.isEmpty {
-                        LazyVGrid(
-                            columns: [GridItem(.flexible(), alignment: .leading),
-                                      GridItem(.flexible(), alignment: .leading)],
-                            alignment: .leading, spacing: 8
-                        ) {
-                            requirementRow("8+ characters",      met: hasMinLength)
-                            requirementRow("1 uppercase letter", met: hasUppercase)
-                            requirementRow("1 lowercase letter", met: hasLowercase)
-                            requirementRow("1 number",           met: hasNumber)
+                        HStack(spacing: 4) {
+                            ForEach(0..<4) { i in
+                                RoundedRectangle(cornerRadius: 2)
+                                    .fill(i < passwordStrength ? strengthColor : Color(.systemGray4))
+                                    .frame(height: 4)
+                                    .animation(.easeInOut(duration: 0.2), value: passwordStrength)
+                            }
                         }
-                        .padding(.top, 2)
-                        .transition(.opacity)
-                    }
-
-                    authField(icon: "lock", placeholder: "Confirm password",
-                              text: $confirmPassword, isSecure: true, contentType: .newPassword)
-
-                    // Passwords match indicator
-                    if !confirmPassword.isEmpty {
-                        HStack(spacing: 6) {
-                            Image(systemName: passwordsMatch ? "checkmark.circle.fill" : "xmark.circle.fill")
-                                .foregroundColor(passwordsMatch ? .green : .red)
-                                .font(.caption)
-                            Text(passwordsMatch ? "Passwords match" : "Passwords don't match")
-                                .font(.caption)
-                                .foregroundColor(passwordsMatch ? .green : .red)
-                            Spacer()
+                        if !strengthLabel.isEmpty {
+                            Text(strengthLabel)
+                                .font(.caption2)
+                                .foregroundColor(strengthColor)
+                                .animation(.easeInOut, value: passwordStrength)
                         }
-                        .padding(.top, 2)
-                        .transition(.opacity)
                     }
                 }
-                .animation(.easeInOut(duration: 0.2), value: password.isEmpty)
-                .animation(.easeInOut(duration: 0.2), value: confirmPassword.isEmpty)
 
                 // Error
                 if let errorMessage {
@@ -105,7 +123,29 @@ struct SignUpView: View {
                         .padding(.top, 12)
                 }
 
-                // Create button
+                // Terms
+                Button { agreedToTerms.toggle() } label: {
+                    HStack(alignment: .center, spacing: 10) {
+                        Image(systemName: agreedToTerms ? "checkmark.square.fill" : "square")
+                            .font(.system(size: 16))
+                            .foregroundColor(agreedToTerms ? brandBlue : Color(.systemGray3))
+                            .frame(width: 20, height: 20)
+
+                        (Text("I agree to Boundr's ")
+                         + Text("Terms of Service").underline().foregroundColor(brandBlue)
+                         + Text(" and ")
+                         + Text("Privacy Policy").underline().foregroundColor(brandBlue)
+                         + Text("."))
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                            .multilineTextAlignment(.leading)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+                .buttonStyle(.plain)
+                .padding(.top, 20)
+
+                // Create account button
                 Button {
                     Task { await signUp() }
                 } label: {
@@ -118,23 +158,11 @@ struct SignUpView: View {
                     }
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 18)
-                    .background(formValid ? brandBlue : Color(.systemGray4))
+                    .background(formValid ? brandBlue : Color(red: 0.70, green: 0.76, blue: 0.95))
                     .cornerRadius(16)
                 }
                 .disabled(!formValid || isLoading)
-                .padding(.top, 28)
-
-                divider.padding(.vertical, 24)
-
-                // Apple
-                SignInWithAppleButton(.signUp) { request in
-                    auth.prepareAppleRequest(request)
-                } onCompletion: { result in
-                    Task { await handleApple(result) }
-                }
-                .frame(height: 54)
-                .cornerRadius(14)
-                .signInWithAppleButtonStyle(.black)
+                .padding(.top, 20)
 
                 // Footer
                 HStack(spacing: 4) {
@@ -144,12 +172,22 @@ struct SignUpView: View {
                 }
                 .font(.subheadline)
                 .frame(maxWidth: .infinity, alignment: .center)
-                .padding(.top, 28)
+                .padding(.top, 24)
             }
             .padding(.horizontal, 24)
             .padding(.bottom, 40)
         }
-        .background(Color(.systemGroupedBackground))
+        .background(
+            LinearGradient(
+                colors: [
+                    Color(red: 0.87, green: 0.91, blue: 0.97),
+                    Color.white
+                ],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .ignoresSafeArea()
+        )
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(true)
         .toolbar {
@@ -195,54 +233,73 @@ struct SignUpView: View {
 
     // MARK: - Subviews
 
-    private func requirementRow(_ label: String, met: Bool) -> some View {
-        HStack(spacing: 6) {
-            Image(systemName: met ? "checkmark.circle.fill" : "circle")
-                .font(.caption)
-                .foregroundColor(met ? .green : Color(.systemGray3))
-            Text(label)
-                .font(.caption)
-                .foregroundColor(met ? .primary : .secondary)
-        }
-    }
-
-    private var divider: some View {
+    private var orDivider: some View {
         HStack {
             Rectangle().fill(Color(.systemGray4)).frame(height: 1)
-            Text("or").font(.caption).foregroundColor(.secondary).padding(.horizontal, 8)
+            Text("OR WITH EMAIL")
+                .font(.system(size: 11, weight: .medium))
+                .foregroundColor(.secondary)
+                .fixedSize()
+                .padding(.horizontal, 8)
             Rectangle().fill(Color(.systemGray4)).frame(height: 1)
         }
     }
 
-    private func authField(icon: String,
-                           placeholder: String,
-                           text: Binding<String>,
-                           keyboard: UIKeyboardType = .default,
-                           isSecure: Bool = false,
-                           contentType: UITextContentType? = nil) -> some View {
-        HStack(spacing: 12) {
-            Image(systemName: icon)
-                .font(.system(size: 15))
+    private func labeledField(_ label: String,
+                               placeholder: String,
+                               text: Binding<String>,
+                               keyboard: UIKeyboardType = .default,
+                               contentType: UITextContentType? = nil,
+                               capitalize: Bool = false) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(label)
+                .font(.system(size: 11, weight: .semibold))
                 .foregroundColor(.secondary)
-                .frame(width: 20)
-
-            if isSecure {
-                SecureField(placeholder, text: text)
-                    .font(.subheadline)
-                    .textContentType(contentType)
-            } else {
-                TextField(placeholder, text: text)
-                    .font(.subheadline)
-                    .keyboardType(keyboard)
-                    .textContentType(contentType)
-                    .autocapitalization(keyboard == .emailAddress ? .none : .words)
-                    .autocorrectionDisabled(keyboard == .emailAddress)
-            }
+                .tracking(0.6)
+            TextField(placeholder, text: text)
+                .font(.subheadline)
+                .keyboardType(keyboard)
+                .textContentType(contentType)
+                .autocapitalization(capitalize ? .words : .none)
+                .autocorrectionDisabled()
+                .padding(.horizontal, 16)
+                .padding(.vertical, 16)
+                .background(Color(.systemBackground))
+                .cornerRadius(12)
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 16)
-        .background(Color(.systemBackground))
-        .cornerRadius(14)
-        .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color(.systemGray4), lineWidth: 1))
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private func labeledSecureField(_ label: String,
+                                    placeholder: String,
+                                    text: Binding<String>,
+                                    isShowing: Binding<Bool>,
+                                    contentType: UITextContentType? = nil) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(label)
+                .font(.system(size: 11, weight: .semibold))
+                .foregroundColor(.secondary)
+                .tracking(0.6)
+            HStack {
+                Group {
+                    if isShowing.wrappedValue {
+                        TextField(placeholder, text: text)
+                    } else {
+                        SecureField(placeholder, text: text)
+                    }
+                }
+                .font(.subheadline)
+                .textContentType(contentType)
+                Button(isShowing.wrappedValue ? "Hide" : "Show") {
+                    isShowing.wrappedValue.toggle()
+                }
+                .font(.subheadline)
+                .foregroundColor(.secondary)
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 16)
+            .background(Color(.systemBackground))
+            .cornerRadius(12)
+        }
     }
 }
