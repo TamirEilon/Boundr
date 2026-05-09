@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		CB1922112FA7DB0000DC1EFB /* Instrument_Serif.zip in Resources */ = {isa = PBXBuildFile; fileRef = CB1922102FA7DB0000DC1EFB /* Instrument_Serif.zip */; };
+		CB87FED92FA673E900C4AAAE /* Visa_export.csv in Resources */ = {isa = PBXBuildFile; fileRef = CB87FED82FA673E900C4AAAE /* Visa_export.csv */; };
 		CB87FF022FA73C5700C4AAAE /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = CB87FF012FA73C5700C4AAAE /* FirebaseAuth */; };
 		CB87FF042FA73F2C00C4AAAE /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = CB87FF032FA73F2C00C4AAAE /* GoogleService-Info.plist */; };
 /* End PBXBuildFile section */
@@ -231,6 +232,7 @@
 			files = (
 				CB87FF042FA73F2C00C4AAAE /* GoogleService-Info.plist in Resources */,
 				CB1922112FA7DB0000DC1EFB /* Instrument_Serif.zip in Resources */,
+				CB87FED92FA673E900C4AAAE /* Visa_export.csv in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

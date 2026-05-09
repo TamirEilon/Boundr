@@ -6,7 +6,9 @@ struct VisaDetailView: View {
     @Environment(\.dismiss) var dismiss
     @Environment(\.openURL) var openURL
 
-    private var eligible: Bool { store.isEligible(visa) }
+    private var eligibility: VisaEligibility { store.eligibility(visa) }
+    private var eligible: Bool { eligibility == .eligible }
+    private var exempt: Bool   { eligibility == .exempt }
     private var saved: Bool    { store.isSaved(visa) }
 
     @State private var showShare = false
@@ -178,13 +180,19 @@ struct VisaDetailView: View {
                 .foregroundColor(.primary)
                 .fixedSize(horizontal: false, vertical: true)
 
-            Text(eligible ? "Eligible" : "Not eligible")
+            Text(exempt ? "No visa needed" : (eligible ? "Eligible" : "Not eligible"))
                 .font(.subheadline).fontWeight(.semibold)
-                .foregroundColor(eligible ? .green : .red)
+                .foregroundColor(exempt ? .blue : (eligible ? .green : .red))
                 .padding(.horizontal, 14).padding(.vertical, 7)
-                .background((eligible ? Color.green : Color.red).opacity(0.12))
+                .background((exempt ? Color.blue : (eligible ? Color.green : Color.red)).opacity(0.12))
                 .cornerRadius(20)
 
+            if exempt, let reason = store.exemptReason(for: visa) {
+                Text(reason)
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
         }
     }
 

@@ -6,6 +6,8 @@ struct EditProfileView: View {
 
     @State private var draft: UserProfile
     @State private var otherOccupation: String = ""
+    @State private var showNationalityPicker = false
+    @State private var nationalitySearch = ""
 
     init(user: UserProfile) {
         _draft = State(initialValue: user)
@@ -42,28 +44,29 @@ struct EditProfileView: View {
     ]
 
     private let nationalities = [
-        "Afghan", "Albanian", "Algerian", "Andorran", "Angolan", "Argentine", "Armenian",
-        "Australian", "Austrian", "Azerbaijani", "Bahamian", "Bahraini", "Bangladeshi",
-        "Belarusian", "Belgian", "Belizean", "Bolivian", "Bosnian", "Botswanan", "Brazilian",
-        "Bruneian", "Bulgarian", "Cambodian", "Cameroonian", "Canadian", "Cape Verdean",
-        "Chilean", "Chinese", "Colombian", "Costa Rican", "Croatian", "Cuban", "Cypriot",
-        "Czech", "Danish", "Ecuadorian", "Egyptian", "Salvadoran", "Estonian", "Ethiopian",
+        "Afghan", "Albanian", "Algerian", "American", "Andorran", "Angolan", "Argentine",
+        "Armenian", "Australian", "Austrian", "Azerbaijani", "Bahamian", "Bahraini",
+        "Bangladeshi", "Belarusian", "Belgian", "Belizean", "Bolivian", "Bosnian",
+        "Botswanan", "Brazilian", "British", "Bruneian", "Bulgarian", "Cambodian",
+        "Cameroonian", "Canadian", "Cape Verdean", "Chilean", "Chinese", "Colombian",
+        "Costa Rican", "Croatian", "Cuban", "Cypriot", "Czech", "Danish", "Dutch",
+        "Ecuadorian", "Egyptian", "Emirati", "Estonian", "Ethiopian", "Filipino",
         "Finnish", "French", "Gabonese", "Gambian", "Georgian", "German", "Ghanaian",
-        "Greek", "Guatemalan", "Guinean", "Haitian", "Honduran", "Hungarian", "Icelandic",
-        "Indian", "Indonesian", "Iranian", "Iraqi", "Irish", "Israeli", "Italian",
-        "Jamaican", "Japanese", "Jordanian", "Kazakhstani", "Kenyan", "Kuwaiti", "Lao",
-        "Latvian", "Lebanese", "Libyan", "Lithuanian", "Luxembourgish", "Malagasy",
-        "Malawian", "Malaysian", "Maldivian", "Malian", "Maltese", "Mauritanian",
-        "Mauritian", "Mexican", "Moldovan", "Mongolian", "Montenegrin", "Moroccan",
-        "Mozambican", "Namibian", "Nepali", "Dutch", "New Zealander", "Nicaraguan",
-        "Nigerien", "Nigerian", "Macedonian", "Norwegian", "Omani", "Pakistani",
-        "Panamanian", "Paraguayan", "Peruvian", "Filipino", "Polish", "Portuguese",
-        "Qatari", "Romanian", "Russian", "Rwandan", "Saudi", "Senegalese", "Serbian",
+        "Greek", "Guatemalan", "Guinean", "Haitian", "Honduran", "Hungarian",
+        "Icelandic", "Indian", "Indonesian", "Iranian", "Iraqi", "Irish", "Israeli",
+        "Italian", "Jamaican", "Japanese", "Jordanian", "Kazakhstani", "Kenyan",
+        "Kuwaiti", "Lao", "Latvian", "Lebanese", "Libyan", "Lithuanian", "Luxembourgish",
+        "Macedonian", "Malagasy", "Malawian", "Malaysian", "Maldivian", "Malian",
+        "Maltese", "Mauritanian", "Mauritian", "Mexican", "Moldovan", "Mongolian",
+        "Montenegrin", "Moroccan", "Mozambican", "Namibian", "Nepali", "New Zealander",
+        "Nicaraguan", "Nigerian", "Nigerien", "Norwegian", "Omani", "Pakistani",
+        "Panamanian", "Paraguayan", "Peruvian", "Polish", "Portuguese", "Qatari",
+        "Romanian", "Russian", "Rwandan", "Salvadoran", "Saudi", "Senegalese", "Serbian",
         "Singaporean", "Slovak", "Slovenian", "Somali", "South African", "South Korean",
         "Spanish", "Sri Lankan", "Sudanese", "Swedish", "Swiss", "Syrian", "Taiwanese",
         "Tajik", "Tanzanian", "Thai", "Tunisian", "Turkish", "Turkmen", "Ugandan",
-        "Ukrainian", "Emirati", "British", "American", "Uruguayan", "Uzbek",
-        "Venezuelan", "Vietnamese", "Yemeni", "Zambian", "Zimbabwean"
+        "Ukrainian", "Uruguayan", "Uzbek", "Venezuelan", "Vietnamese", "Yemeni",
+        "Zambian", "Zimbabwean"
     ]
 
     private let educationOptions: [(key: String, label: String)] = [
@@ -275,13 +278,14 @@ struct EditProfileView: View {
         }
     }
 
-    private var availableNationalities: [String] {
-        nationalities.filter { !draft.nationalities.contains($0) }
+    private var filteredNationalities: [String] {
+        let available = nationalities.filter { !draft.nationalities.contains($0) }
+        if nationalitySearch.isEmpty { return available }
+        return available.filter { $0.localizedCaseInsensitiveContains(nationalitySearch) }
     }
 
     private var nationalityField: some View {
         VStack(alignment: .leading, spacing: 10) {
-            // Selected pills
             if !draft.nationalities.isEmpty {
                 FlowLayout(spacing: 8) {
                     ForEach(draft.nationalities, id: \.self) { nat in
@@ -303,12 +307,10 @@ struct EditProfileView: View {
                 }
             }
 
-            // Add button (visible when fewer than 3 selected)
             if draft.nationalities.count < 3 {
-                Menu {
-                    ForEach(availableNationalities, id: \.self) { nat in
-                        Button(nat) { draft.nationalities.append(nat) }
-                    }
+                Button {
+                    nationalitySearch = ""
+                    showNationalityPicker = true
                 } label: {
                     HStack(spacing: 6) {
                         Image(systemName: "plus")
@@ -323,6 +325,26 @@ struct EditProfileView: View {
                     .cornerRadius(16)
                     .overlay(RoundedRectangle(cornerRadius: 16)
                         .stroke(Color(.systemGray5), lineWidth: 1))
+                }
+                .sheet(isPresented: $showNationalityPicker) {
+                    NavigationStack {
+                        List(filteredNationalities, id: \.self) { nat in
+                            Button(nat) {
+                                draft.nationalities.append(nat)
+                                showNationalityPicker = false
+                            }
+                            .foregroundColor(.primary)
+                        }
+                        .searchable(text: $nationalitySearch, prompt: "Search nationality")
+                        .navigationTitle("Select Nationality")
+                        .navigationBarTitleDisplayMode(.inline)
+                        .toolbar {
+                            ToolbarItem(placement: .cancellationAction) {
+                                Button("Cancel") { showNationalityPicker = false }
+                            }
+                        }
+                    }
+                    .presentationDetents([.medium, .large])
                 }
             }
         }
