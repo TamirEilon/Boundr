@@ -10,6 +10,7 @@
 		CB1922112FA7DB0000DC1EFB /* Instrument_Serif.zip in Resources */ = {isa = PBXBuildFile; fileRef = CB1922102FA7DB0000DC1EFB /* Instrument_Serif.zip */; };
 		CB87FED92FA673E900C4AAAE /* Visa_export.csv in Resources */ = {isa = PBXBuildFile; fileRef = CB87FED82FA673E900C4AAAE /* Visa_export.csv */; };
 		CB87FF022FA73C5700C4AAAE /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = CB87FF012FA73C5700C4AAAE /* FirebaseAuth */; };
+		CB87FF072FA73C5700C4AAAE /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = CB87FF062FA73C5700C4AAAE /* FirebaseFirestore */; };
 		CB87FF042FA73F2C00C4AAAE /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = CB87FF032FA73F2C00C4AAAE /* GoogleService-Info.plist */; };
 /* End PBXBuildFile section */
 
@@ -63,6 +64,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				CB87FF022FA73C5700C4AAAE /* FirebaseAuth in Frameworks */,
+				CB87FF072FA73C5700C4AAAE /* FirebaseFirestore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -127,6 +129,7 @@
 			name = Boundr;
 			packageProductDependencies = (
 				CB87FF012FA73C5700C4AAAE /* FirebaseAuth */,
+				CB87FF062FA73C5700C4AAAE /* FirebaseFirestore */,
 			);
 			productName = Boundr;
 			productReference = CB87FEA02FA6631300C4AAAE /* Boundr.app */;
@@ -612,6 +615,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = CB87FF002FA73C5700C4AAAE /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseAuth;
+		};
+		CB87FF062FA73C5700C4AAAE /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CB87FF002FA73C5700C4AAAE /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

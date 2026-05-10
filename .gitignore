@@ -1,5 +1,6 @@
 # Firebase — never commit these
 GoogleService-Info.plist
+serviceAccountKey.json
 
 # Xcode
 *.xcuserstate

@@ -14,7 +14,19 @@ struct BoundrApp: App {
     var body: some Scene {
         WindowGroup {
             Group {
-                if auth.isSignedIn {
+                if store.isLoading {
+                    ZStack {
+                        Color(.systemBackground).ignoresSafeArea()
+                        VStack(spacing: 16) {
+                            Image("BoundrLogo")
+                                .resizable().scaledToFit()
+                                .frame(width: 64, height: 64)
+                                .cornerRadius(16)
+                            ProgressView()
+                                .scaleEffect(1.2)
+                        }
+                    }
+                } else if auth.isSignedIn {
                     if auth.onboardingComplete {
                         ContentView()
                             .environmentObject(store)
