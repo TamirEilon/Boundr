@@ -10,8 +10,9 @@
 		CB1922112FA7DB0000DC1EFB /* Instrument_Serif.zip in Resources */ = {isa = PBXBuildFile; fileRef = CB1922102FA7DB0000DC1EFB /* Instrument_Serif.zip */; };
 		CB87FED92FA673E900C4AAAE /* Visa_export.csv in Resources */ = {isa = PBXBuildFile; fileRef = CB87FED82FA673E900C4AAAE /* Visa_export.csv */; };
 		CB87FF022FA73C5700C4AAAE /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = CB87FF012FA73C5700C4AAAE /* FirebaseAuth */; };
-		CB87FF072FA73C5700C4AAAE /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = CB87FF062FA73C5700C4AAAE /* FirebaseFirestore */; };
 		CB87FF042FA73F2C00C4AAAE /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = CB87FF032FA73F2C00C4AAAE /* GoogleService-Info.plist */; };
+		CB87FF072FA73C5700C4AAAE /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = CB87FF062FA73C5700C4AAAE /* FirebaseFirestore */; };
+		CB9848E02FB0AF03006838AD /* DMSans-VariableFont_opsz,wght.ttf in Resources */ = {isa = PBXBuildFile; fileRef = CB9848DF2FB0AF02006838AD /* DMSans-VariableFont_opsz,wght.ttf */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -38,6 +39,7 @@
 		CB87FEB72FA6631600C4AAAE /* BoundrUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BoundrUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		CB87FED82FA673E900C4AAAE /* Visa_export.csv */ = {isa = PBXFileReference; lastKnownFileType = text; path = Visa_export.csv; sourceTree = "<group>"; };
 		CB87FF032FA73F2C00C4AAAE /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		CB9848DF2FB0AF02006838AD /* DMSans-VariableFont_opsz,wght.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "DMSans-VariableFont_opsz,wght.ttf"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -95,6 +97,7 @@
 				CB87FEA12FA6631300C4AAAE /* Products */,
 				CB87FF032FA73F2C00C4AAAE /* GoogleService-Info.plist */,
 				CB1922102FA7DB0000DC1EFB /* Instrument_Serif.zip */,
+				CB9848DF2FB0AF02006838AD /* DMSans-VariableFont_opsz,wght.ttf */,
 			);
 			sourceTree = "<group>";
 		};
@@ -235,6 +238,7 @@
 			files = (
 				CB87FF042FA73F2C00C4AAAE /* GoogleService-Info.plist in Resources */,
 				CB1922112FA7DB0000DC1EFB /* Instrument_Serif.zip in Resources */,
+				CB9848E02FB0AF03006838AD /* DMSans-VariableFont_opsz,wght.ttf in Resources */,
 				CB87FED92FA673E900C4AAAE /* Visa_export.csv in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

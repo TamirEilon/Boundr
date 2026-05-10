@@ -6,6 +6,7 @@ import FirebaseAuth
 struct BoundrApp: App {
     @StateObject private var store = VisaStore()
     @StateObject private var auth  = AuthManager()
+    @State private var animationSettled = false
 
     init() {
         FirebaseApp.configure()
@@ -14,18 +15,8 @@ struct BoundrApp: App {
     var body: some Scene {
         WindowGroup {
             Group {
-                if store.isLoading {
-                    ZStack {
-                        Color(.systemBackground).ignoresSafeArea()
-                        VStack(spacing: 16) {
-                            Image("BoundrLogo")
-                                .resizable().scaledToFit()
-                                .frame(width: 64, height: 64)
-                                .cornerRadius(16)
-                            ProgressView()
-                                .scaleEffect(1.2)
-                        }
-                    }
+                if store.isLoading || !animationSettled {
+                    SplashView(onSettled: { animationSettled = true })
                 } else if auth.isSignedIn {
                     if auth.onboardingComplete {
                         ContentView()
