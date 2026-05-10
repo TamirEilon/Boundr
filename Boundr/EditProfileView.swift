@@ -8,6 +8,8 @@ struct EditProfileView: View {
     @State private var otherOccupation: String = ""
     @State private var showNationalityPicker = false
     @State private var nationalitySearch = ""
+    @State private var showCountryPicker = false
+    @State private var countrySearch = ""
 
     init(user: UserProfile) {
         _draft = State(initialValue: user)
@@ -250,10 +252,51 @@ struct EditProfileView: View {
             .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color(.systemGray5), lineWidth: 1))
     }
 
+    private var filteredCountries: [String] {
+        if countrySearch.isEmpty { return allCountries }
+        return allCountries.filter { $0.localizedCaseInsensitiveContains(countrySearch) }
+    }
+
     private var homeCountryField: some View {
-        pickerRow(selection: $draft.homeCountry,
-                  options: allCountries,
-                  display: { $0 })
+        Button {
+            countrySearch = ""
+            showCountryPicker = true
+        } label: {
+            HStack {
+                Text(draft.homeCountry.isEmpty ? "Select country" : draft.homeCountry)
+                    .font(.subheadline).fontWeight(.semibold)
+                    .foregroundColor(draft.homeCountry.isEmpty ? Color(.systemGray3) : .primary)
+                Spacer()
+                Image(systemName: "chevron.down")
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundColor(.secondary)
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 14)
+            .background(Color(.systemBackground))
+            .cornerRadius(16)
+            .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color(.systemGray5), lineWidth: 1))
+        }
+        .sheet(isPresented: $showCountryPicker) {
+            NavigationStack {
+                List(filteredCountries, id: \.self) { country in
+                    Button(country) {
+                        draft.homeCountry = country
+                        showCountryPicker = false
+                    }
+                    .foregroundColor(.primary)
+                }
+                .searchable(text: $countrySearch, prompt: "Search country")
+                .navigationTitle("Select Country")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button("Cancel") { showCountryPicker = false }
+                    }
+                }
+            }
+            .presentationDetents([.medium, .large])
+        }
     }
 
     private var relationshipGrid: some View {

@@ -76,11 +76,13 @@ struct UserProfile: Codable {
 
     var maritalStatusDisplay: String {
         switch relationshipStatus {
-        case "single":   return "Single"
-        case "married":  return "Married"
-        case "divorced": return "Divorced"
-        case "widowed":  return "Widowed"
-        default:         return relationshipStatus.capitalized
+        case "single":             return "Single"
+        case "in_a_relationship":  return "In a relationship"
+        case "married":            return "Married"
+        case "married_with_kids":  return "Married with kids"
+        case "divorced":           return "Divorced"
+        case "widowed":            return "Widowed"
+        default:                   return relationshipStatus.capitalized
         }
     }
 }
