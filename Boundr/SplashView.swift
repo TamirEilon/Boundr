@@ -51,7 +51,7 @@ struct SplashView: View {
 
             // .lastTextBaseline aligns the dot's bottom to the B's baseline,
             // which matches the visual bottom of the capital letter.
-            HStack(alignment: .lastTextBaseline, spacing: -12) {
+            HStack(alignment: .lastTextBaseline, spacing: -14) {
                 Text("B")
                     .font(.custom("DM Sans", size: 100))
                     .fontWeight(.black)

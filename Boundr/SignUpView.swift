@@ -124,25 +124,20 @@ struct SignUpView: View {
                 }
 
                 // Terms
-                Button { agreedToTerms.toggle() } label: {
-                    HStack(alignment: .center, spacing: 10) {
+                HStack(alignment: .center, spacing: 10) {
+                    Button { agreedToTerms.toggle() } label: {
                         Image(systemName: agreedToTerms ? "checkmark.square.fill" : "square")
                             .font(.system(size: 16))
                             .foregroundColor(agreedToTerms ? brandBlue : Color(.systemGray3))
                             .frame(width: 20, height: 20)
-
-                        (Text("I agree to Boundr's ")
-                         + Text("Terms of Service").underline().foregroundColor(brandBlue)
-                         + Text(" and ")
-                         + Text("Privacy Policy").underline().foregroundColor(brandBlue)
-                         + Text("."))
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                            .multilineTextAlignment(.leading)
-                            .fixedSize(horizontal: false, vertical: true)
                     }
+                    .buttonStyle(.plain)
+
+                    Text(termsText)
+                        .font(.caption)
+                        .multilineTextAlignment(.leading)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
-                .buttonStyle(.plain)
                 .padding(.top, 20)
 
                 // Create account button
@@ -301,5 +296,28 @@ struct SignUpView: View {
             .background(Color(.systemBackground))
             .cornerRadius(12)
         }
+    }
+
+    private var termsText: AttributedString {
+        var str     = AttributedString("I agree to Boundr's ")
+        str.foregroundColor = .secondary
+
+        var terms   = AttributedString("Terms and Conditions")
+        terms.foregroundColor = brandBlue
+        terms.underlineStyle  = .single
+        terms.link = URL(string: "https://imaginative-status-057532.framer.app/terms-and-condition")
+
+        var and     = AttributedString(" and ")
+        and.foregroundColor = .secondary
+
+        var privacy = AttributedString("Privacy Policy")
+        privacy.foregroundColor = brandBlue
+        privacy.underlineStyle  = .single
+        privacy.link = URL(string: "https://imaginative-status-057532.framer.app/privacy-policy")
+
+        var period  = AttributedString(".")
+        period.foregroundColor = .secondary
+
+        return str + terms + and + privacy + period
     }
 }

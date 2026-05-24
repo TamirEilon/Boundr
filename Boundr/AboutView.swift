@@ -2,10 +2,11 @@ import SwiftUI
 
 struct AboutView: View {
     @Environment(\.dismiss) var dismiss
-    @State private var showPrivacy  = false
-    @State private var showTerms    = false
-    @State private var showAI       = false
-    @State private var showContact  = false
+    private let privacyURL    = URL(string: "https://imaginative-status-057532.framer.app/privacy-policy")!
+    private let termsURL      = URL(string: "https://imaginative-status-057532.framer.app/terms-and-condition")!
+    private let aiURL         = URL(string: "https://imaginative-status-057532.framer.app/ai-disclaimer")!
+    private let refundURL     = URL(string: "https://imaginative-status-057532.framer.app/refund-policy")!
+    private let contactURL    = URL(string: "https://imaginative-status-057532.framer.app/contact")!
 
     private let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
     private let buildNumber = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? ""
@@ -21,11 +22,11 @@ struct AboutView: View {
                     .padding(.top, 24)
                     .padding(.bottom, 24)
 
-                Text("Visas, demystified.")
+                Text("Visas, simplified.")
                     .font(.system(size: 36, weight: .regular, design: .serif))
                     .padding(.bottom, 16)
 
-                Text("Boundr turns the most opaque part of moving abroad — the legal one — into something you can scan in under a minute. We pull from official immigration sources across 80+ countries and match them to your real profile.")
+                Text("Boundr helps you discover visa opportunities based on your profile, goals, and future plans — all in one place. We simplify the complex world of immigration by turning scattered requirements into clear, personalized insights you can understand in minutes.")
                     .font(.body)
                     .foregroundColor(.primary)
                     .lineSpacing(4)
@@ -44,13 +45,15 @@ struct AboutView: View {
                 .padding(.bottom, 16)
 
                 VStack(spacing: 0) {
-                    linkRow("Privacy Policy")  { showPrivacy  = true }
+                    linkRow("Privacy Policy")     { UIApplication.shared.open(privacyURL) }
                     Divider().padding(.leading, 16)
-                    linkRow("Terms of Service") { showTerms   = true }
+                    linkRow("Terms & Conditions") { UIApplication.shared.open(termsURL) }
                     Divider().padding(.leading, 16)
-                    linkRow("AI Disclaimer")    { showAI      = true }
+                    linkRow("AI Disclaimer")      { UIApplication.shared.open(aiURL) }
                     Divider().padding(.leading, 16)
-                    linkRow("Contact us")       { showContact = true }
+                    linkRow("Refund Policy")      { UIApplication.shared.open(refundURL) }
+                    Divider().padding(.leading, 16)
+                    linkRow("Contact us")         { UIApplication.shared.open(contactURL) }
                 }
                 .background(Color(.systemBackground))
                 .cornerRadius(14)
@@ -72,10 +75,6 @@ struct AboutView: View {
                 }
             }
         }
-        .navigationDestination(isPresented: $showPrivacy)  { PrivacyPolicyView() }
-        .navigationDestination(isPresented: $showTerms)    { TermsOfServiceView() }
-        .navigationDestination(isPresented: $showAI)       { AIDisclaimerView() }
-        .navigationDestination(isPresented: $showContact)  { ContactUsView() }
     }
 
     private func linkRow(_ title: String, action: @escaping () -> Void) -> some View {
