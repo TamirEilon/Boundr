@@ -4,16 +4,22 @@ import FirebaseAuth
 // MARK: - ContentView
 
 struct ContentView: View {
+    @State private var selectedTab = 0
+
     var body: some View {
-        TabView {
-            HomeView()
+        TabView(selection: $selectedTab) {
+            HomeView(selectedTab: $selectedTab)
                 .tabItem { Label("Home", systemImage: "house.fill") }
+                .tag(0)
             ExploreView()
                 .tabItem { Label("Explore", systemImage: "safari") }
+                .tag(1)
             SavedView()
                 .tabItem { Label("Saved", systemImage: "bookmark") }
+                .tag(2)
             ProfileView()
                 .tabItem { Label("Profile", systemImage: "person") }
+                .tag(3)
         }
     }
 }
@@ -23,6 +29,7 @@ struct ContentView: View {
 struct HomeView: View {
     @EnvironmentObject var store: VisaStore
     @EnvironmentObject var auth: AuthManager
+    @Binding var selectedTab: Int
 
     private var firstName: String {
         let name = auth.currentUser?.displayName ?? store.user.firstName
@@ -72,11 +79,14 @@ struct HomeView: View {
                 Text("Hey, \(firstName)").font(.title).fontWeight(.bold)
             }
             Spacer()
-            Circle().fill(Color.black).frame(width: 40, height: 40)
-                .overlay(
-                    Text(String((auth.currentUser?.displayName ?? store.user.fullName).prefix(1)).uppercased())
-                        .font(.headline).foregroundColor(.white)
-                )
+            Button { selectedTab = 3 } label: {
+                Circle().fill(Color.black).frame(width: 40, height: 40)
+                    .overlay(
+                        Text(String((auth.currentUser?.displayName ?? store.user.fullName).prefix(1)).uppercased())
+                            .font(.headline).foregroundColor(.white)
+                    )
+            }
+            .buttonStyle(.plain)
         }
         .padding(.horizontal).padding(.top)
     }
@@ -382,5 +392,7 @@ struct WorkingTowardRow: View {
 }
 
 #Preview {
-    ContentView().environmentObject(VisaStore()).environmentObject(AuthManager())
+    ContentView()
+        .environmentObject(VisaStore())
+        .environmentObject(AuthManager())
 }

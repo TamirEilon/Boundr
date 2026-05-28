@@ -10,9 +10,9 @@
 		CB1922112FA7DB0000DC1EFB /* Instrument_Serif.zip in Resources */ = {isa = PBXBuildFile; fileRef = CB1922102FA7DB0000DC1EFB /* Instrument_Serif.zip */; };
 		CB87FED92FA673E900C4AAAE /* Visa_export.csv in Resources */ = {isa = PBXBuildFile; fileRef = CB87FED82FA673E900C4AAAE /* Visa_export.csv */; };
 		CB87FF022FA73C5700C4AAAE /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = CB87FF012FA73C5700C4AAAE /* FirebaseAuth */; };
-		CB87FF042FA73F2C00C4AAAE /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = CB87FF032FA73F2C00C4AAAE /* GoogleService-Info.plist */; };
 		CB87FF072FA73C5700C4AAAE /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = CB87FF062FA73C5700C4AAAE /* FirebaseFirestore */; };
 		CB9848E02FB0AF03006838AD /* DMSans-VariableFont_opsz,wght.ttf in Resources */ = {isa = PBXBuildFile; fileRef = CB9848DF2FB0AF02006838AD /* DMSans-VariableFont_opsz,wght.ttf */; };
+		CBA6AEF22FC8823400DBAD78 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = CBA6AEF12FC8823300DBAD78 /* GoogleService-Info.plist */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -38,8 +38,8 @@
 		CB87FEAD2FA6631600C4AAAE /* BoundrTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BoundrTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		CB87FEB72FA6631600C4AAAE /* BoundrUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BoundrUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		CB87FED82FA673E900C4AAAE /* Visa_export.csv */ = {isa = PBXFileReference; lastKnownFileType = text; path = Visa_export.csv; sourceTree = "<group>"; };
-		CB87FF032FA73F2C00C4AAAE /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		CB9848DF2FB0AF02006838AD /* DMSans-VariableFont_opsz,wght.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "DMSans-VariableFont_opsz,wght.ttf"; sourceTree = "<group>"; };
+		CBA6AEF12FC8823300DBAD78 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -95,9 +95,9 @@
 				CB87FEB02FA6631600C4AAAE /* BoundrTests */,
 				CB87FEBA2FA6631600C4AAAE /* BoundrUITests */,
 				CB87FEA12FA6631300C4AAAE /* Products */,
-				CB87FF032FA73F2C00C4AAAE /* GoogleService-Info.plist */,
 				CB1922102FA7DB0000DC1EFB /* Instrument_Serif.zip */,
 				CB9848DF2FB0AF02006838AD /* DMSans-VariableFont_opsz,wght.ttf */,
+				CBA6AEF12FC8823300DBAD78 /* GoogleService-Info.plist */,
 			);
 			sourceTree = "<group>";
 		};
@@ -236,10 +236,10 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				CB87FF042FA73F2C00C4AAAE /* GoogleService-Info.plist in Resources */,
 				CB1922112FA7DB0000DC1EFB /* Instrument_Serif.zip in Resources */,
 				CB9848E02FB0AF03006838AD /* DMSans-VariableFont_opsz,wght.ttf in Resources */,
 				CB87FED92FA673E900C4AAAE /* Visa_export.csv in Resources */,
+				CBA6AEF22FC8823400DBAD78 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -424,6 +424,7 @@
 				CODE_SIGN_ENTITLEMENTS = Boundr/Boundr.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = ULF4JMYNHA;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Info.plist;
@@ -437,7 +438,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = online.tamireilon.Boundr;
+				PRODUCT_BUNDLE_IDENTIFIER = com.tamireilon.boundr;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -457,6 +458,7 @@
 				CODE_SIGN_ENTITLEMENTS = Boundr/Boundr.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = ULF4JMYNHA;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Info.plist;
@@ -470,7 +472,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = online.tamireilon.Boundr;
+				PRODUCT_BUNDLE_IDENTIFIER = com.tamireilon.boundr;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;

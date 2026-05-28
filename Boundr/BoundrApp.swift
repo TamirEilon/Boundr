@@ -32,6 +32,7 @@ struct BoundrApp: App {
                         .environmentObject(auth)
                 }
             }
+            .preferredColorScheme(.light)
             .animation(.easeInOut(duration: 0.3), value: auth.isSignedIn)
             .animation(.easeInOut(duration: 0.3), value: auth.onboardingComplete)
             .onAppear {

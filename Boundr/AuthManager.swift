@@ -79,7 +79,22 @@ class AuthManager: ObservableObject {
             rawNonce: nonce,
             fullName: appleCredential.fullName
         )
-        try await Auth.auth().signIn(with: credential)
+        let authResult = try await Auth.auth().signIn(with: credential)
+
+        // Apple only sends the name on the very first sign-in — save it immediately
+        if let fullName = appleCredential.fullName {
+            let given  = fullName.givenName  ?? ""
+            let family = fullName.familyName ?? ""
+            let name   = [given, family].filter { !$0.isEmpty }.joined(separator: " ")
+            if !name.isEmpty {
+                let request = authResult.user.createProfileChangeRequest()
+                request.displayName = name
+                try await request.commitChanges()
+            }
+        }
+        DispatchQueue.main.async {
+            self.currentUser = Auth.auth().currentUser
+        }
     }
 
     // MARK: - Helpers
