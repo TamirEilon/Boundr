@@ -387,7 +387,17 @@ class VisaStore: ObservableObject {
 
     // MARK: - Persistence
 
+    func reset() {
+        cancellables.removeAll()
+        currentUID = nil
+        user = UserProfile()
+        savedVisaIDs = []
+        recentlyViewedIDs = []
+    }
+
     func loadProfile(for uid: String) {
+        // Always reset first so no stale data from a previous user bleeds through
+        reset()
         currentUID = uid
         let key = "profile_\(uid)"
         if let data = UserDefaults.standard.data(forKey: key),

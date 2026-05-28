@@ -44,7 +44,10 @@ struct BoundrApp: App {
                 }
             }
             .onChange(of: auth.currentUser?.uid) { _, uid in
-                guard let uid else { return }
+                guard let uid else {
+                    store.reset()
+                    return
+                }
                 store.loadProfile(for: uid)
                 if let name = auth.currentUser?.displayName, !name.isEmpty {
                     store.user.fullName = name
