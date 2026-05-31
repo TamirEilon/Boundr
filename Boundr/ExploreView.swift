@@ -101,7 +101,6 @@ struct ExploreView: View {
                 .padding(.horizontal).padding(.bottom, 12)
 
                 // Dropdowns
-                ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 8) {
                     // Region
                     Menu {
@@ -145,6 +144,24 @@ struct ExploreView: View {
 
                         // Sort
                         Menu {
+                            // Eligibility section
+                            Button { selectedEligibility = "All" } label: {
+                                if selectedEligibility == "All" { Label("All", systemImage: "checkmark") }
+                                else { Text("All") }
+                            }
+                            Button { selectedEligibility = "Eligible" } label: {
+                                if selectedEligibility == "Eligible" { Label("Eligible", systemImage: "checkmark") }
+                                else { Text("Eligible") }
+                            }
+                            Button { selectedEligibility = "Not Eligible" } label: {
+                                if selectedEligibility == "Not Eligible" { Label("Not Eligible", systemImage: "checkmark") }
+                                else { Text("Not Eligible") }
+                            }
+                            Button { selectedEligibility = "No Visa Needed" } label: {
+                                if selectedEligibility == "No Visa Needed" { Label("No Visa Needed", systemImage: "checkmark") }
+                                else { Text("No Visa Needed") }
+                            }
+                            Divider()
                             Button { sortOption = .none } label: {
                                 if sortOption == .none { Label("Default", systemImage: "checkmark") }
                                 else { Text("Default") }
@@ -178,31 +195,12 @@ struct ExploreView: View {
                             }
                         } label: {
                             dropdownLabel(
-                                title: sortOption == .none ? "Sort" : sortOption.rawValue,
-                                isActive: sortOption != .none
-                            )
-                        }
-
-                        // Eligibility
-                        Menu {
-                            ForEach(eligibilityOptions, id: \.self) { option in
-                                Button { selectedEligibility = option } label: {
-                                    if selectedEligibility == option {
-                                        Label(option, systemImage: "checkmark")
-                                    } else {
-                                        Text(option)
-                                    }
-                                }
-                            }
-                        } label: {
-                            dropdownLabel(
-                                title: selectedEligibility == "All" ? "Eligibility" : selectedEligibility,
-                                isActive: selectedEligibility != "All"
+                                title: sortOption != .none ? sortOption.rawValue : selectedEligibility != "All" ? selectedEligibility : "Sort",
+                                isActive: sortOption != .none || selectedEligibility != "All"
                             )
                         }
                 }
                 .padding(.horizontal)
-                } // end ScrollView
                 .padding(.bottom, 14)
 
                 // List
