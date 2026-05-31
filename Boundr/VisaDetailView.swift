@@ -176,7 +176,7 @@ struct VisaDetailView: View {
     private var descriptionSection: some View {
         VStack(alignment: .leading, spacing: 14) {
             Text(visa.description)
-                .font(.body)
+                .font(.subheadline)
                 .foregroundColor(.primary)
                 .fixedSize(horizontal: false, vertical: true)
 
@@ -211,7 +211,6 @@ struct VisaDetailView: View {
             Image(systemName: icon).font(.system(size: 16)).foregroundColor(.secondary)
             Text(label).font(.caption).foregroundColor(.secondary)
             Text(value).font(.subheadline).fontWeight(.semibold)
-                .lineLimit(2)
                 .fixedSize(horizontal: false, vertical: true)
         }
         .frame(maxWidth: .infinity, minHeight: 95, alignment: .topLeading)
