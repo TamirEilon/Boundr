@@ -213,7 +213,7 @@ struct VisaDetailView: View {
             Text(value).font(.subheadline).fontWeight(.semibold)
                 .fixedSize(horizontal: false, vertical: true)
         }
-        .frame(maxWidth: .infinity, minHeight: 95, alignment: .topLeading)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .padding(14)
         .background(Color(.systemBackground))
         .cornerRadius(14)
