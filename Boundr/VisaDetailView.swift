@@ -11,7 +11,9 @@ struct VisaDetailView: View {
     private var exempt: Bool   { eligibility == .exempt }
     private var saved: Bool    { store.isSaved(visa) }
 
-    @State private var showShare = false
+    @State private var showShare        = false
+    @State private var shareItems: [Any] = []
+    @State private var isPreparingShare  = false
 
     private enum CriterionStatus {
         case met, notMet, unknown
@@ -67,10 +69,37 @@ struct VisaDetailView: View {
         .toolbar(.hidden, for: .navigationBar)
         .onAppear { store.recordView(visa) }
         .sheet(isPresented: $showShare) {
-            let text = "\(visa.visaName) – \(visa.country)\n\(visa.description)"
-            let items: [Any] = visa.applicationURL.isEmpty ? [text] : [text, URL(string: visa.applicationURL)!]
-            ShareSheet(activityItems: items)
+            ShareSheet(activityItems: shareItems)
         }
+    }
+
+    // MARK: - Share card
+
+    @MainActor
+    private func prepareShareCard() async {
+        guard !isPreparingShare else { return }
+        isPreparingShare = true
+        defer { isPreparingShare = false }
+
+        // Fetch hero image first so ImageRenderer can paint it synchronously
+        var heroImage: UIImage?
+        if let url = CountryUtils.imageURL(for: visa.country),
+           let (data, _) = try? await URLSession.shared.data(from: url) {
+            heroImage = UIImage(data: data)
+        }
+
+        let card = VisaShareCardView(visa: visa, heroImage: heroImage)
+        let renderer = ImageRenderer(content: card)
+        renderer.scale = 3 // @3x for crisp output on all devices
+
+        if let image = renderer.uiImage {
+            shareItems = [image]
+        } else {
+            // Fallback to plain text if rendering fails
+            shareItems = ["\(visa.visaName) – \(visa.country)\n\(visa.description)"]
+        }
+
+        showShare = true
     }
 
     // MARK: - Hero
@@ -138,13 +167,22 @@ struct VisaDetailView: View {
                     }
                     Spacer()
                     HStack(spacing: 10) {
-                        Button { showShare = true } label: {
-                            Image(systemName: "square.and.arrow.up")
-                                .font(.system(size: 15))
-                                .foregroundColor(.primary)
-                                .frame(width: 38, height: 38)
-                                .background(.regularMaterial, in: Circle())
+                        Button { Task { await prepareShareCard() } } label: {
+                            Group {
+                                if isPreparingShare {
+                                    ProgressView()
+                                        .tint(.primary)
+                                        .scaleEffect(0.8)
+                                } else {
+                                    Image(systemName: "square.and.arrow.up")
+                                        .font(.system(size: 15))
+                                        .foregroundColor(.primary)
+                                }
+                            }
+                            .frame(width: 38, height: 38)
+                            .background(.regularMaterial, in: Circle())
                         }
+                        .disabled(isPreparingShare)
                         Button { store.toggleSaved(visa) } label: {
                             Image(systemName: saved ? "bookmark.fill" : "bookmark")
                                 .font(.system(size: 15))
