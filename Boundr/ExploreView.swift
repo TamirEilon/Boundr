@@ -16,6 +16,7 @@ enum SortOption: String, CaseIterable {
 
 struct ExploreView: View {
     @EnvironmentObject var store: VisaStore
+    @Binding var eligibilityFilter: String
     @State private var searchText           = ""
     @State private var selectedRegion       = "All"
     @State private var selectedType         = "All"
@@ -23,6 +24,10 @@ struct ExploreView: View {
     @State private var sortOption: SortOption = .none
 
     private let eligibilityOptions = ["All", "Eligible", "Not Eligible", "No Visa Needed"]
+
+    init(eligibilityFilter: Binding<String> = .constant("All")) {
+        self._eligibilityFilter = eligibilityFilter
+    }
 
     private let regions = ["All", "Europe", "Americas", "Asia", "Oceania", "Middle East", "Other"]
 
@@ -219,6 +224,12 @@ struct ExploreView: View {
             }
             .navigationBarHidden(true)
             .navigationDestination(for: Visa.self) { VisaDetailView(visa: $0) }
+            .onAppear {
+                if eligibilityFilter != "All" {
+                    selectedEligibility = eligibilityFilter
+                    eligibilityFilter   = "All" // reset so repeat taps work
+                }
+            }
         }
     }
 

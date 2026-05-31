@@ -4,20 +4,21 @@ import FirebaseAuth
 // MARK: - ContentView
 
 struct ContentView: View {
-    @State private var selectedTab = 0
+    @State private var selectedTab               = 0
+    @State private var exploreEligibilityFilter  = "All"
 
     var body: some View {
         TabView(selection: $selectedTab) {
             HomeView(selectedTab: $selectedTab)
                 .tabItem { Label("Home", systemImage: "house.fill") }
                 .tag(0)
-            ExploreView()
+            ExploreView(eligibilityFilter: $exploreEligibilityFilter)
                 .tabItem { Label("Explore", systemImage: "safari") }
                 .tag(1)
             SavedView()
                 .tabItem { Label("Saved", systemImage: "bookmark") }
                 .tag(2)
-            ProfileView()
+            ProfileView(selectedTab: $selectedTab, exploreEligibilityFilter: $exploreEligibilityFilter)
                 .tabItem { Label("Profile", systemImage: "person") }
                 .tag(3)
         }

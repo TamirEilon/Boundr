@@ -4,9 +4,17 @@ import FirebaseAuth
 struct ProfileView: View {
     @EnvironmentObject var store: VisaStore
     @EnvironmentObject var auth: AuthManager
+    @Binding var selectedTab: Int
+    @Binding var exploreEligibilityFilter: String
     @State private var showEditProfile = false
     @State private var showAbout = false
     @State private var showSettings = false
+
+    init(selectedTab: Binding<Int> = .constant(3),
+         exploreEligibilityFilter: Binding<String> = .constant("All")) {
+        self._selectedTab              = selectedTab
+        self._exploreEligibilityFilter = exploreEligibilityFilter
+    }
 
     var body: some View {
         NavigationStack {
@@ -73,25 +81,31 @@ struct ProfileView: View {
 
     private var statsRow: some View {
         HStack(spacing: 10) {
-            statCard(dot: .green, label: "Eligible",   value: "\(store.eligibleVisas.count)")
-            statCard(dot: .red,   label: "Not yet",    value: "\(store.ineligibleVisas.count)")
-            statCard(dot: .blue,  label: "No visa needed", value: "\(store.exemptVisas.count)")
+            statCard(dot: .green, label: "Eligible",      value: "\(store.eligibleVisas.count)",   filter: "Eligible")
+            statCard(dot: .red,   label: "Not yet",       value: "\(store.ineligibleVisas.count)", filter: "Not Eligible")
+            statCard(dot: .blue,  label: "No visa needed",value: "\(store.exemptVisas.count)",     filter: "No Visa Needed")
         }
         .padding(.horizontal)
     }
 
-    private func statCard(dot: Color, label: String, value: String) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
-            HStack(spacing: 5) {
-                Circle().fill(dot).frame(width: 7, height: 7)
-                Text(label).font(.caption).foregroundColor(.secondary)
+    private func statCard(dot: Color, label: String, value: String, filter: String) -> some View {
+        Button {
+            exploreEligibilityFilter = filter
+            selectedTab = 1
+        } label: {
+            VStack(alignment: .leading, spacing: 6) {
+                HStack(spacing: 5) {
+                    Circle().fill(dot).frame(width: 7, height: 7)
+                    Text(label).font(.caption).foregroundColor(.secondary)
+                }
+                Text(value).font(.title2).fontWeight(.bold).foregroundColor(.primary)
             }
-            Text(value).font(.title2).fontWeight(.bold)
+            .frame(maxWidth: .infinity, minHeight: 90, alignment: .leading)
+            .padding(14)
+            .background(Color(.systemBackground))
+            .cornerRadius(14)
         }
-        .frame(maxWidth: .infinity, minHeight: 90, alignment: .leading)
-        .padding(14)
-        .background(Color(.systemBackground))
-        .cornerRadius(14)
+        .buttonStyle(.plain)
     }
 
     // MARK: Profile Details
