@@ -11,7 +11,9 @@ struct VisaDetailView: View {
     private var exempt: Bool   { eligibility == .exempt }
     private var saved: Bool    { store.isSaved(visa) }
 
-    @State private var showShare = false
+    @State private var showShare        = false
+    @State private var shareItems: [Any] = []
+    @State private var isPreparingShare  = false
 
     private enum CriterionStatus {
         case met, notMet, unknown
@@ -67,10 +69,28 @@ struct VisaDetailView: View {
         .toolbar(.hidden, for: .navigationBar)
         .onAppear { store.recordView(visa) }
         .sheet(isPresented: $showShare) {
-            let text = "\(visa.visaName) – \(visa.country)\n\(visa.description)"
-            let items: [Any] = visa.applicationURL.isEmpty ? [text] : [text, URL(string: visa.applicationURL)!]
-            ShareSheet(activityItems: items)
+            ShareSheet(activityItems: shareItems)
         }
+    }
+
+    // MARK: - Share card
+
+    @MainActor
+    private func prepareShareCard() async {
+        guard !isPreparingShare else { return }
+        isPreparingShare = true
+        defer { isPreparingShare = false }
+
+        let baseURL = "https://tamireilon.github.io/Boundr/visa/?id=\(visa.id)"
+
+        if let url = URL(string: baseURL) {
+            shareItems = [url]
+        } else {
+            // Fallback to plain text
+            shareItems = ["\(visa.visaName) – \(visa.country)\n\(visa.description)"]
+        }
+
+        showShare = true
     }
 
     // MARK: - Hero
@@ -138,13 +158,22 @@ struct VisaDetailView: View {
                     }
                     Spacer()
                     HStack(spacing: 10) {
-                        Button { showShare = true } label: {
-                            Image(systemName: "square.and.arrow.up")
-                                .font(.system(size: 15))
-                                .foregroundColor(.primary)
-                                .frame(width: 38, height: 38)
-                                .background(.regularMaterial, in: Circle())
+                        Button { Task { await prepareShareCard() } } label: {
+                            Group {
+                                if isPreparingShare {
+                                    ProgressView()
+                                        .tint(.primary)
+                                        .scaleEffect(0.8)
+                                } else {
+                                    Image(systemName: "square.and.arrow.up")
+                                        .font(.system(size: 15))
+                                        .foregroundColor(.primary)
+                                }
+                            }
+                            .frame(width: 38, height: 38)
+                            .background(.regularMaterial, in: Circle())
                         }
+                        .disabled(isPreparingShare)
                         Button { store.toggleSaved(visa) } label: {
                             Image(systemName: saved ? "bookmark.fill" : "bookmark")
                                 .font(.system(size: 15))
