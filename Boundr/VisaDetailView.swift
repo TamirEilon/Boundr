@@ -81,21 +81,12 @@ struct VisaDetailView: View {
         isPreparingShare = true
         defer { isPreparingShare = false }
 
-        // Fetch hero image first so ImageRenderer can paint it synchronously
-        var heroImage: UIImage?
-        if let url = CountryUtils.imageURL(for: visa.country),
-           let (data, _) = try? await URLSession.shared.data(from: url) {
-            heroImage = UIImage(data: data)
-        }
+        let baseURL = "https://tamireilon.github.io/Boundr/visa/?id=\(visa.id)"
 
-        let card = VisaShareCardView(visa: visa, heroImage: heroImage)
-        let renderer = ImageRenderer(content: card)
-        renderer.scale = 3 // @3x for crisp output on all devices
-
-        if let image = renderer.uiImage {
-            shareItems = [image]
+        if let url = URL(string: baseURL) {
+            shareItems = [url]
         } else {
-            // Fallback to plain text if rendering fails
+            // Fallback to plain text
             shareItems = ["\(visa.visaName) – \(visa.country)\n\(visa.description)"]
         }
 
