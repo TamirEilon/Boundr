@@ -16,10 +16,18 @@ enum SortOption: String, CaseIterable {
 
 struct ExploreView: View {
     @EnvironmentObject var store: VisaStore
-    @State private var searchText      = ""
-    @State private var selectedRegion  = "All"
-    @State private var selectedType    = "All"
+    @Binding var eligibilityFilter: String
+    @State private var searchText           = ""
+    @State private var selectedRegion       = "All"
+    @State private var selectedType         = "All"
+    @State private var selectedEligibility  = "All"
     @State private var sortOption: SortOption = .none
+
+    private let eligibilityOptions = ["All", "Eligible", "Not Eligible", "No Visa Needed"]
+
+    init(eligibilityFilter: Binding<String> = .constant("All")) {
+        self._eligibilityFilter = eligibilityFilter
+    }
 
     private let regions = ["All", "Europe", "Americas", "Asia", "Oceania", "Middle East", "Other"]
 
@@ -47,7 +55,15 @@ struct ExploreView: View {
                 || visa.visaTypeDisplay.localizedCaseInsensitiveContains(searchText)
             let matchRegion = selectedRegion == "All" || visa.region == selectedRegion
             let matchType   = selectedType   == "All" || visa.visaType == selectedType
-            return matchSearch && matchRegion && matchType
+            let matchEligibility: Bool = {
+                switch selectedEligibility {
+                case "Eligible":       return store.eligibility(visa) == .eligible
+                case "Not Eligible":   return store.eligibility(visa) == .ineligible
+                case "No Visa Needed": return store.eligibility(visa) == .exempt
+                default:               return true
+                }
+            }()
+            return matchSearch && matchRegion && matchType && matchEligibility
         }
 
         switch sortOption {
@@ -133,6 +149,24 @@ struct ExploreView: View {
 
                         // Sort
                         Menu {
+                            // Eligibility section
+                            Button { selectedEligibility = "All" } label: {
+                                if selectedEligibility == "All" { Label("All", systemImage: "checkmark") }
+                                else { Text("All") }
+                            }
+                            Button { selectedEligibility = "Eligible" } label: {
+                                if selectedEligibility == "Eligible" { Label("Eligible", systemImage: "checkmark") }
+                                else { Text("Eligible") }
+                            }
+                            Button { selectedEligibility = "Not Eligible" } label: {
+                                if selectedEligibility == "Not Eligible" { Label("Not Eligible", systemImage: "checkmark") }
+                                else { Text("Not Eligible") }
+                            }
+                            Button { selectedEligibility = "No Visa Needed" } label: {
+                                if selectedEligibility == "No Visa Needed" { Label("No Visa Needed", systemImage: "checkmark") }
+                                else { Text("No Visa Needed") }
+                            }
+                            Divider()
                             Button { sortOption = .none } label: {
                                 if sortOption == .none { Label("Default", systemImage: "checkmark") }
                                 else { Text("Default") }
@@ -166,8 +200,8 @@ struct ExploreView: View {
                             }
                         } label: {
                             dropdownLabel(
-                                title: sortOption == .none ? "Sort" : sortOption.rawValue,
-                                isActive: sortOption != .none
+                                title: sortOption != .none ? sortOption.rawValue : selectedEligibility != "All" ? selectedEligibility : "Sort",
+                                isActive: sortOption != .none || selectedEligibility != "All"
                             )
                         }
                 }
@@ -190,6 +224,12 @@ struct ExploreView: View {
             }
             .navigationBarHidden(true)
             .navigationDestination(for: Visa.self) { VisaDetailView(visa: $0) }
+            .onAppear {
+                if eligibilityFilter != "All" {
+                    selectedEligibility = eligibilityFilter
+                    eligibilityFilter   = "All" // reset so repeat taps work
+                }
+            }
         }
     }
 
@@ -286,19 +326,35 @@ struct VisaListRow: View {
 
             Divider().padding(.horizontal, 16).padding(.top, 14)
 
-            HStack(spacing: 20) {
-                Label(visa.duration,       systemImage: "clock").font(.caption)
-                Label(visa.cost,           systemImage: "creditcard").font(.caption)
-                Spacer()
-                Label(visa.processingTime, systemImage: "calendar").font(.caption)
+            VStack(spacing: 8) {
+                infoRow(icon: "clock",      label: "Duration",   value: visa.duration)
+                infoRow(icon: "calendar",   label: "Processing", value: visa.processingTime)
+                infoRow(icon: "creditcard", label: "Cost",       value: visa.cost)
             }
-            .foregroundColor(.secondary)
-            .padding(.horizontal, 16).padding(.top, 12).padding(.bottom, 16)
+            .padding(.horizontal, 16).padding(.top, 10).padding(.bottom, 16)
         }
         .background(Color(.systemBackground))
         .cornerRadius(16)
         .shadow(color: .black.opacity(0.06), radius: 8, x: 0, y: 2)
         .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color(.systemGray5), lineWidth: 1))
+    }
+
+    private func infoRow(icon: String, label: String, value: String) -> some View {
+        HStack(spacing: 8) {
+            Image(systemName: icon)
+                .font(.caption)
+                .foregroundColor(.secondary)
+                .frame(width: 14)
+            Text(label)
+                .font(.caption)
+                .foregroundColor(.secondary)
+            Spacer()
+            Text(value)
+                .font(.caption)
+                .fontWeight(.medium)
+                .foregroundColor(.primary)
+                .multilineTextAlignment(.trailing)
+        }
     }
 }
 
