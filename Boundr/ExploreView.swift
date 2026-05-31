@@ -16,10 +16,13 @@ enum SortOption: String, CaseIterable {
 
 struct ExploreView: View {
     @EnvironmentObject var store: VisaStore
-    @State private var searchText      = ""
-    @State private var selectedRegion  = "All"
-    @State private var selectedType    = "All"
+    @State private var searchText           = ""
+    @State private var selectedRegion       = "All"
+    @State private var selectedType         = "All"
+    @State private var selectedEligibility  = "All"
     @State private var sortOption: SortOption = .none
+
+    private let eligibilityOptions = ["All", "Eligible", "Not Eligible", "No Visa Needed"]
 
     private let regions = ["All", "Europe", "Americas", "Asia", "Oceania", "Middle East", "Other"]
 
@@ -47,7 +50,15 @@ struct ExploreView: View {
                 || visa.visaTypeDisplay.localizedCaseInsensitiveContains(searchText)
             let matchRegion = selectedRegion == "All" || visa.region == selectedRegion
             let matchType   = selectedType   == "All" || visa.visaType == selectedType
-            return matchSearch && matchRegion && matchType
+            let matchEligibility: Bool = {
+                switch selectedEligibility {
+                case "Eligible":       return store.eligibility(visa) == .eligible
+                case "Not Eligible":   return store.eligibility(visa) == .ineligible
+                case "No Visa Needed": return store.eligibility(visa) == .exempt
+                default:               return true
+                }
+            }()
+            return matchSearch && matchRegion && matchType && matchEligibility
         }
 
         switch sortOption {
@@ -90,6 +101,7 @@ struct ExploreView: View {
                 .padding(.horizontal).padding(.bottom, 12)
 
                 // Dropdowns
+                ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 8) {
                     // Region
                     Menu {
@@ -170,8 +182,27 @@ struct ExploreView: View {
                                 isActive: sortOption != .none
                             )
                         }
+
+                        // Eligibility
+                        Menu {
+                            ForEach(eligibilityOptions, id: \.self) { option in
+                                Button { selectedEligibility = option } label: {
+                                    if selectedEligibility == option {
+                                        Label(option, systemImage: "checkmark")
+                                    } else {
+                                        Text(option)
+                                    }
+                                }
+                            }
+                        } label: {
+                            dropdownLabel(
+                                title: selectedEligibility == "All" ? "Eligibility" : selectedEligibility,
+                                isActive: selectedEligibility != "All"
+                            )
+                        }
                 }
                 .padding(.horizontal)
+                } // end ScrollView
                 .padding(.bottom, 14)
 
                 // List
@@ -286,19 +317,35 @@ struct VisaListRow: View {
 
             Divider().padding(.horizontal, 16).padding(.top, 14)
 
-            HStack(spacing: 20) {
-                Label(visa.duration,       systemImage: "clock").font(.caption)
-                Label(visa.cost,           systemImage: "creditcard").font(.caption)
-                Spacer()
-                Label(visa.processingTime, systemImage: "calendar").font(.caption)
+            VStack(spacing: 8) {
+                infoRow(icon: "clock",      label: "Duration",   value: visa.duration)
+                infoRow(icon: "calendar",   label: "Processing", value: visa.processingTime)
+                infoRow(icon: "creditcard", label: "Cost",       value: visa.cost)
             }
-            .foregroundColor(.secondary)
-            .padding(.horizontal, 16).padding(.top, 12).padding(.bottom, 16)
+            .padding(.horizontal, 16).padding(.top, 10).padding(.bottom, 16)
         }
         .background(Color(.systemBackground))
         .cornerRadius(16)
         .shadow(color: .black.opacity(0.06), radius: 8, x: 0, y: 2)
         .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color(.systemGray5), lineWidth: 1))
+    }
+
+    private func infoRow(icon: String, label: String, value: String) -> some View {
+        HStack(spacing: 8) {
+            Image(systemName: icon)
+                .font(.caption)
+                .foregroundColor(.secondary)
+                .frame(width: 14)
+            Text(label)
+                .font(.caption)
+                .foregroundColor(.secondary)
+            Spacer()
+            Text(value)
+                .font(.caption)
+                .fontWeight(.medium)
+                .foregroundColor(.primary)
+                .multilineTextAlignment(.trailing)
+        }
     }
 }
 
