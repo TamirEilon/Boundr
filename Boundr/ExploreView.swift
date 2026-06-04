@@ -210,7 +210,6 @@ struct ExploreView: View {
 
                 // List
                 if filteredVisas.isEmpty {
-                    Spacer()
                     VStack(spacing: 16) {
                         Image(systemName: "magnifyingglass")
                             .font(.system(size: 40, weight: .light))
@@ -233,7 +232,7 @@ struct ExploreView: View {
                                 .cornerRadius(20)
                         }
                     }
-                    Spacer()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
                     ScrollView {
                         LazyVStack(spacing: 12) {
