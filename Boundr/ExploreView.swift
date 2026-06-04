@@ -209,17 +209,44 @@ struct ExploreView: View {
                 .padding(.bottom, 14)
 
                 // List
-                ScrollView {
-                    LazyVStack(spacing: 12) {
-                        ForEach(filteredVisas) { visa in
-                            NavigationLink(value: visa) {
-                                VisaListRow(visa: visa, eligibility: store.eligibility(visa))
-                            }
-                            .buttonStyle(.plain)
+                if filteredVisas.isEmpty {
+                    Spacer()
+                    VStack(spacing: 16) {
+                        Image(systemName: "magnifyingglass")
+                            .font(.system(size: 40, weight: .light))
+                            .foregroundColor(.secondary)
+                        Text("No visas match your filters")
+                            .font(.headline)
+                            .foregroundColor(.primary)
+                        Button {
+                            searchText          = ""
+                            selectedRegion      = "All"
+                            selectedType        = "All"
+                            selectedEligibility = "All"
+                            sortOption          = .none
+                        } label: {
+                            Text("Clear filters")
+                                .font(.subheadline).fontWeight(.semibold)
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 24).padding(.vertical, 12)
+                                .background(Color.black)
+                                .cornerRadius(20)
                         }
                     }
-                    .padding(.horizontal)
-                    .padding(.bottom, 20)
+                    Spacer()
+                } else {
+                    ScrollView {
+                        LazyVStack(spacing: 12) {
+                            ForEach(filteredVisas) { visa in
+                                NavigationLink(value: visa) {
+                                    VisaListRow(visa: visa, eligibility: store.eligibility(visa))
+                                }
+                                .buttonStyle(.plain)
+                            }
+                        }
+                        .padding(.horizontal)
+                        .padding(.bottom, 20)
+                    }
                 }
             }
             .navigationBarHidden(true)
