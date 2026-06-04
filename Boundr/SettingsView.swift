@@ -25,6 +25,13 @@ struct SettingsView: View {
                         actionRow(icon: "bell", iconColor: .red, title: "Notification settings")
                     }
                     .buttonStyle(.plain)
+                    Divider()
+                    Button {
+                        Task { await NotificationManager.shared.scheduleTestNotification() }
+                    } label: {
+                        actionRow(icon: "ladybug", iconColor: .orange, title: "Test notification (5s)")
+                    }
+                    .buttonStyle(.plain)
                 }
 
                 // Privacy

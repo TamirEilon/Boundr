@@ -116,6 +116,47 @@ final class NotificationManager: NSObject {
         }
     }
 
+    // MARK: - Debug
+
+    func scheduleTestNotification() async {
+        let _ = await requestPermission()
+
+        // Top match test
+        let topContent                   = UNMutableNotificationContent()
+        topContent.title                 = "Your top match today 🌍"
+        topContent.body                  = "Argentina — Digital Nomad Visa. You're eligible!"
+        topContent.sound                 = .default
+        topContent.categoryIdentifier    = topMatchCategoryID
+
+        if let imgURL = CountryUtils.imageURL(for: "Argentina"),
+           let fileURL = await downloadAndCache(url: imgURL, filename: "test_topmatch"),
+           let attachment = try? UNNotificationAttachment(identifier: "heroImage", url: fileURL, options: nil) {
+            topContent.attachments = [attachment]
+        }
+
+        let topTrigger = UNTimeIntervalNotificationTrigger(timeInterval: 5, repeats: false)
+        let topRequest = UNNotificationRequest(identifier: "debug_topmatch", content: topContent, trigger: topTrigger)
+        try? await UNUserNotificationCenter.current().add(topRequest)
+
+        // Fact test (fires 10s later)
+        let fact                         = facts[0]
+        let factContent                  = UNMutableNotificationContent()
+        factContent.title                = "Did you know? 💡"
+        factContent.body                 = fact.body
+        factContent.sound                = .default
+        factContent.categoryIdentifier   = factCategoryID
+
+        if let imgURL = CountryUtils.imageURL(for: fact.country),
+           let fileURL = await downloadAndCache(url: imgURL, filename: "test_fact"),
+           let attachment = try? UNNotificationAttachment(identifier: "heroImage", url: fileURL, options: nil) {
+            factContent.attachments = [attachment]
+        }
+
+        let factTrigger = UNTimeIntervalNotificationTrigger(timeInterval: 10, repeats: false)
+        let factRequest = UNNotificationRequest(identifier: "debug_fact", content: factContent, trigger: factTrigger)
+        try? await UNUserNotificationCenter.current().add(factRequest)
+    }
+
     // MARK: - Schedule
 
     /// Call this every time the app becomes active with the latest top match.
