@@ -3,7 +3,7 @@ import UIKit
 
 // MARK: - NotificationManager
 
-final class NotificationManager: NSObject, ObservableObject {
+final class NotificationManager: NSObject {
     static let shared = NotificationManager()
 
     // MARK: - Fact pool
