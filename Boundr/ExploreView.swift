@@ -211,12 +211,9 @@ struct ExploreView: View {
                 // List
                 if filteredVisas.isEmpty {
                     VStack(spacing: 16) {
-                        Image(systemName: "magnifyingglass")
-                            .font(.system(size: 40, weight: .light))
-                            .foregroundColor(.secondary)
                         Text("No visas match your filters")
-                            .font(.headline)
-                            .foregroundColor(.primary)
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
                         Button {
                             searchText          = ""
                             selectedRegion      = "All"
@@ -225,10 +222,10 @@ struct ExploreView: View {
                             sortOption          = .none
                         } label: {
                             Text("Clear filters")
-                                .font(.subheadline).fontWeight(.semibold)
-                                .foregroundColor(.white)
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
                                 .padding(.horizontal, 24).padding(.vertical, 12)
-                                .background(Color.black)
+                                .background(Color(.systemGray5))
                                 .cornerRadius(20)
                         }
                     }
