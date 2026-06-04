@@ -10,6 +10,7 @@ struct BoundrApp: App {
 
     init() {
         FirebaseApp.configure()
+        NotificationManager.shared.setup()
     }
 
     var body: some Scene {
@@ -51,6 +52,21 @@ struct BoundrApp: App {
                 store.loadProfile(for: uid)
                 if let name = auth.currentUser?.displayName, !name.isEmpty {
                     store.user.fullName = name
+                }
+            }
+            // Request permission once onboarding is complete, then keep schedule fresh
+            .onChange(of: auth.onboardingComplete) { _, complete in
+                guard complete else { return }
+                Task {
+                    await NotificationManager.shared.requestPermission()
+                    await NotificationManager.shared.scheduleAll(topMatch: store.topMatch)
+                }
+            }
+            // Reschedule whenever top match updates (visas loaded from Firebase)
+            .onChange(of: store.topMatch?.id) { _, _ in
+                guard auth.onboardingComplete else { return }
+                Task {
+                    await NotificationManager.shared.scheduleAll(topMatch: store.topMatch)
                 }
             }
         }
