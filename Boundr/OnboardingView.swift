@@ -70,7 +70,16 @@ struct OnboardingView: View {
             VStack(spacing: 0) {
                 // Nav bar
                 HStack {
-                    Button { if step > 0 { withAnimation { step -= 1 } } } label: {
+                    Button {
+                        if step > 0 {
+                            // Skip experience step (5) going back if Retired
+                            if step == 6 && occupation == "Retired" {
+                                withAnimation { step = 4 }
+                            } else {
+                                withAnimation { step -= 1 }
+                            }
+                        }
+                    } label: {
                         Image(systemName: "chevron.left")
                             .font(.system(size: 16, weight: .semibold))
                             .foregroundColor(.primary)
@@ -82,7 +91,17 @@ struct OnboardingView: View {
                     Spacer()
                     progressDots
                     Spacer()
-                    Color.clear.frame(width: 38, height: 38)
+                    // Skip button — only on non-critical steps
+                    if [3, 4, 5, 6].contains(step) {
+                        Button { advance() } label: {
+                            Text("Skip")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                                .frame(width: 48, height: 38)
+                        }
+                    } else {
+                        Color.clear.frame(width: 48, height: 38)
+                    }
                 }
                 .padding(.horizontal, 24)
                 .padding(.top, 16)
@@ -517,11 +536,11 @@ struct OnboardingView: View {
             }
             .padding(.top, 16)
             VStack(spacing: 6) {
-                Slider(value: $age, in: 16...65, step: 1).tint(.black)
+                Slider(value: $age, in: 16...90, step: 1).tint(.black)
                 HStack {
                     Text("16").font(.caption).foregroundColor(.secondary)
                     Spacer()
-                    Text("65").font(.caption).foregroundColor(.secondary)
+                    Text("90").font(.caption).foregroundColor(.secondary)
                 }
             }
             .padding(.top, 8)
@@ -767,8 +786,10 @@ struct OnboardingView: View {
                 summaryRow("Education",  educationOptions.first { $0.key == education }?.label ?? education)
                 Divider().padding(.leading, 16)
                 summaryRow("Occupation", occupation)
-                Divider().padding(.leading, 16)
-                summaryRow("Experience", "\(Int(experience)) years")
+                if occupation != "Retired" {
+                    Divider().padding(.leading, 16)
+                    summaryRow("Experience", "\(Int(experience)) years")
+                }
                 Divider().padding(.leading, 16)
                 summaryRow("Status", relationshipOptions.first { $0.key == relationshipStatus }?.label ?? relationshipStatus)
             }
@@ -818,7 +839,12 @@ struct OnboardingView: View {
             commitToStore()
             withAnimation(.easeInOut(duration: 0.25)) { step += 1 }
         } else if step < totalSteps - 1 {
-            withAnimation(.easeInOut(duration: 0.25)) { step += 1 }
+            // Skip experience step (5) for Retired users
+            if step == 4 && occupation == "Retired" {
+                withAnimation(.easeInOut(duration: 0.25)) { step = 6 }
+            } else {
+                withAnimation(.easeInOut(duration: 0.25)) { step += 1 }
+            }
         } else {
             auth.completeOnboarding()
         }

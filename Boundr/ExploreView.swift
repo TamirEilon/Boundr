@@ -209,17 +209,40 @@ struct ExploreView: View {
                 .padding(.bottom, 14)
 
                 // List
-                ScrollView {
-                    LazyVStack(spacing: 12) {
-                        ForEach(filteredVisas) { visa in
-                            NavigationLink(value: visa) {
-                                VisaListRow(visa: visa, eligibility: store.eligibility(visa))
-                            }
-                            .buttonStyle(.plain)
+                if filteredVisas.isEmpty {
+                    VStack(spacing: 16) {
+                        Text("No visas match your filters")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                        Button {
+                            searchText          = ""
+                            selectedRegion      = "All"
+                            selectedType        = "All"
+                            selectedEligibility = "All"
+                            sortOption          = .none
+                        } label: {
+                            Text("Clear filters")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                                .padding(.horizontal, 24).padding(.vertical, 12)
+                                .background(Color(.systemGray5))
+                                .cornerRadius(20)
                         }
                     }
-                    .padding(.horizontal)
-                    .padding(.bottom, 20)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else {
+                    ScrollView {
+                        LazyVStack(spacing: 12) {
+                            ForEach(filteredVisas) { visa in
+                                NavigationLink(value: visa) {
+                                    VisaListRow(visa: visa, eligibility: store.eligibility(visa))
+                                }
+                                .buttonStyle(.plain)
+                            }
+                        }
+                        .padding(.horizontal)
+                        .padding(.bottom, 20)
+                    }
                 }
             }
             .navigationBarHidden(true)
