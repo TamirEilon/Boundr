@@ -6,8 +6,6 @@ struct SettingsView: View {
     @EnvironmentObject var store: VisaStore
     @Environment(\.dismiss) var dismiss
 
-    @State private var roadmapNotifications = true
-    @State private var tipsNotifications    = true
     @State private var showDeleteConfirm    = false
     @State private var showExportSheet      = false
     @State private var showFAQ             = false
@@ -19,11 +17,14 @@ struct SettingsView: View {
             VStack(alignment: .leading, spacing: 28) {
                 // Notifications
                 settingsSection(title: "Notifications") {
-                    toggleRow(icon: "map", iconColor: Color(red: 38/255, green: 99/255, blue: 235/255),
-                              title: "Roadmap progress", toggle: $roadmapNotifications)
-                    Divider()
-                    toggleRow(icon: "lightbulb", iconColor: .orange,
-                              title: "Tips & guides", toggle: $tipsNotifications)
+                    Button {
+                        if let url = URL(string: UIApplication.openNotificationSettingsURLString) {
+                            UIApplication.shared.open(url)
+                        }
+                    } label: {
+                        actionRow(icon: "bell", iconColor: .red, title: "Notification settings")
+                    }
+                    .buttonStyle(.plain)
                 }
 
                 // Privacy
