@@ -178,10 +178,12 @@ struct ProfileView: View {
 
             Spacer()
 
+
             Image(systemName: "chevron.right")
                 .font(.caption).foregroundColor(Color(.systemGray3))
         }
         .padding(.horizontal, 16).padding(.vertical, 14)
+        .contentShape(Rectangle())
     }
 
     // MARK: Log Out

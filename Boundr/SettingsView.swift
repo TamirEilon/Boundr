@@ -157,6 +157,7 @@ struct SettingsView: View {
                 .font(.caption).foregroundColor(Color(.systemGray3))
         }
         .padding(.horizontal, 16).padding(.vertical, 14)
+        .contentShape(Rectangle())
     }
 
     // MARK: - Actions

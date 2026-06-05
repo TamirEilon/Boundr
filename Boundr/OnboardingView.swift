@@ -36,7 +36,7 @@ struct OnboardingView: View {
     @State private var step = 0
 
     // Collected answers
-    @State private var selectedNationalities: Set<String> = ["American"]
+    @State private var selectedNationalities: Set<String> = []
     @State private var countrySearch = ""
     @State private var residenceCountry = ""
     @State private var residenceSearch = ""
