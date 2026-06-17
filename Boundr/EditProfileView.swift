@@ -81,7 +81,7 @@ struct EditProfileView: View {
     private let occupationOptions = [
         "Software Engineer", "Designer", "Product Manager", "Data Scientist",
         "Marketing", "Sales", "Teacher", "Doctor", "Lawyer", "Accountant",
-        "Consultant", "Entrepreneur", "Freelancer", "Student", "Other"
+        "Consultant", "Entrepreneur", "Freelancer", "Student", "Retired", "Other"
     ]
 
     private let relationshipOptions: [(key: String, label: String)] = [
@@ -131,8 +131,11 @@ struct EditProfileView: View {
                     .animation(.easeInOut(duration: 0.2), value: draft.occupation)
                 }
 
-                formField(label: "Years of experience") {
-                    textRow(value: intBinding(\.experienceYears), keyboard: .numberPad)
+                if draft.occupation != "Retired" {
+                    formField(label: "Years of experience") {
+                        textRow(value: intBinding(\.experienceYears), keyboard: .numberPad)
+                    }
+                    .transition(.opacity.combined(with: .move(edge: .top)))
                 }
 
                 formField(label: "Relationship status") {

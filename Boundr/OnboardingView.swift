@@ -54,6 +54,11 @@ struct OnboardingView: View {
         auth.currentUser?.displayName?.components(separatedBy: " ").first ?? "there"
     }
 
+    // Occupations where "years of experience" is irrelevant
+    private var skipsExperience: Bool {
+        ["Retired", "Student", "Founder / Self-employed"].contains(occupation)
+    }
+
     private var canAdvance: Bool {
         switch step {
         case 0: return !selectedNationalities.isEmpty
@@ -72,8 +77,8 @@ struct OnboardingView: View {
                 HStack {
                     Button {
                         if step > 0 {
-                            // Skip experience step (5) going back if Retired
-                            if step == 6 && occupation == "Retired" {
+                            // Skip experience step (5) going back when it's irrelevant
+                            if step == 6 && skipsExperience {
                                 withAnimation { step = 4 }
                             } else {
                                 withAnimation { step -= 1 }
@@ -786,7 +791,7 @@ struct OnboardingView: View {
                 summaryRow("Education",  educationOptions.first { $0.key == education }?.label ?? education)
                 Divider().padding(.leading, 16)
                 summaryRow("Occupation", occupation)
-                if occupation != "Retired" {
+                if !skipsExperience {
                     Divider().padding(.leading, 16)
                     summaryRow("Experience", "\(Int(experience)) years")
                 }
@@ -839,8 +844,8 @@ struct OnboardingView: View {
             commitToStore()
             withAnimation(.easeInOut(duration: 0.25)) { step += 1 }
         } else if step < totalSteps - 1 {
-            // Skip experience step (5) for Retired users
-            if step == 4 && occupation == "Retired" {
+            // Skip experience step (5) when it's irrelevant for the occupation
+            if step == 4 && skipsExperience {
                 withAnimation(.easeInOut(duration: 0.25)) { step = 6 }
             } else {
                 withAnimation(.easeInOut(duration: 0.25)) { step += 1 }
