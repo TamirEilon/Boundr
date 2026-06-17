@@ -203,57 +203,60 @@ struct TopMatchCard: View {
     }
 
     var body: some View {
-        Color.clear
-            .frame(height: 230)
-            .background {
-                AsyncImage(url: CountryUtils.imageURL(for: visa.country)) { phase in
-                    if case .success(let image) = phase {
-                        image.resizable().scaledToFill()
-                    } else {
-                        Rectangle().fill(fallbackGradient)
-                    }
+        VStack(alignment: .leading, spacing: 0) {
+            // Badge
+            HStack(spacing: 4) {
+                Image(systemName: isEligible ? "sparkle" : "lock").font(.caption)
+                Text(isEligible ? "TOP MATCH" : "EXPLORE")
+                    .font(.caption).fontWeight(.semibold).tracking(1.2)
+            }
+            .foregroundColor(.white.opacity(0.85))
+
+            Spacer(minLength: 16)
+
+            // Content
+            VStack(alignment: .leading, spacing: 8) {
+                Text(visa.country.uppercased())
+                    .font(.caption).fontWeight(.medium).foregroundColor(.white.opacity(0.75))
+
+                Text(visa.visaName)
+                    .font(.title2).fontWeight(.bold).foregroundColor(.white)
+                    .lineLimit(2)
+
+                Text(visa.description)
+                    .font(.subheadline).foregroundColor(.white.opacity(0.8)).lineLimit(2)
+
+                HStack(spacing: 16) {
+                    Label(visa.processingTime, systemImage: "clock")
+                        .font(.caption).lineLimit(1)
+                    Label(visa.cost, systemImage: "creditcard")
+                        .font(.caption).lineLimit(1).truncationMode(.tail)
+                    Spacer(minLength: 8)
+                    Image(systemName: "arrow.right")
+                        .font(.system(size: 15, weight: .semibold)).foregroundColor(.white)
+                        .padding(11).background(Color(red: 38/255, green: 99/255, blue: 235/255)).clipShape(Circle())
+                }
+                .foregroundColor(.white.opacity(0.85))
+            }
+        }
+        .padding(20)
+        .frame(maxWidth: .infinity, minHeight: 230, alignment: .topLeading)
+        .background {
+            AsyncImage(url: CountryUtils.imageURL(for: visa.country)) { phase in
+                if case .success(let image) = phase {
+                    image.resizable().scaledToFill()
+                } else {
+                    Rectangle().fill(fallbackGradient)
                 }
             }
-            .clipped()
             .overlay {
                 LinearGradient(
                     colors: [.black.opacity(0.15), .black.opacity(0.65)],
                     startPoint: .top, endPoint: .bottom
                 )
             }
-            .overlay(alignment: .topLeading) {
-                HStack(spacing: 4) {
-                    Image(systemName: isEligible ? "sparkle" : "lock").font(.caption)
-                    Text(isEligible ? "TOP MATCH" : "EXPLORE")
-                        .font(.caption).fontWeight(.semibold).tracking(1.2)
-                }
-                .foregroundColor(.white.opacity(0.85))
-                .padding(20)
-            }
-            .overlay(alignment: .bottomLeading) {
-                VStack(alignment: .leading, spacing: 8) {
-                    Text(visa.country.uppercased())
-                        .font(.caption).fontWeight(.medium).foregroundColor(.white.opacity(0.75))
-
-                    Text(visa.visaName)
-                        .font(.title2).fontWeight(.bold).foregroundColor(.white)
-
-                    Text(visa.description)
-                        .font(.subheadline).foregroundColor(.white.opacity(0.8)).lineLimit(2)
-
-                    HStack(spacing: 16) {
-                        Label(visa.processingTime, systemImage: "clock").font(.caption)
-                        Label(visa.cost,           systemImage: "creditcard").font(.caption)
-                        Spacer()
-                        Image(systemName: "arrow.right")
-                            .font(.system(size: 15, weight: .semibold)).foregroundColor(.white)
-                            .padding(11).background(Color(red: 38/255, green: 99/255, blue: 235/255)).clipShape(Circle())
-                    }
-                    .foregroundColor(.white.opacity(0.85))
-                }
-                .padding(20)
-            }
-            .clipShape(RoundedRectangle(cornerRadius: 20))
+        }
+        .clipShape(RoundedRectangle(cornerRadius: 20))
     }
 }
 

@@ -11,6 +11,7 @@ struct SignInView: View {
     @State private var rememberMe   = false
     @State private var isLoading    = false
     @State private var errorMessage: String?
+    @State private var showSignUp   = false
 
     private let brandBlue = Color(red: 38/255, green: 99/255, blue: 235/255)
 
@@ -104,7 +105,7 @@ struct SignInView: View {
                 // Footer
                 HStack(spacing: 4) {
                     Text("New to Boundr?").foregroundColor(.secondary)
-                    Button("Create account") { dismiss() }
+                    Button("Create account") { showSignUp = true }
                         .fontWeight(.semibold).foregroundColor(brandBlue)
                 }
                 .font(.subheadline)
@@ -127,6 +128,7 @@ struct SignInView: View {
         )
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(true)
+        .navigationDestination(isPresented: $showSignUp) { SignUpView() }
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
                 Button { dismiss() } label: {
