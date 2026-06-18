@@ -1,10 +1,26 @@
 import SwiftUI
+import StoreKit
 
 struct VisaDetailView: View {
     let visa: Visa
     @EnvironmentObject var store: VisaStore
     @Environment(\.dismiss) var dismiss
     @Environment(\.openURL) var openURL
+    @Environment(\.requestReview) private var requestReview
+
+    /// Toggle save state, and when the user *adds* a save (a positive moment),
+    /// occasionally ask for an App Store rating.
+    private func handleSaveTapped() {
+        let wasSaved = store.isSaved(visa)
+        store.toggleSaved(visa)
+        guard !wasSaved else { return }   // only on save, not un-save
+        if ReviewManager.shouldRequestReview() {
+            Task {
+                try? await Task.sleep(for: .seconds(1))
+                requestReview()
+            }
+        }
+    }
 
     private var eligibility: VisaEligibility { store.eligibility(visa) }
     private var eligible: Bool { eligibility == .eligible }
@@ -174,7 +190,7 @@ struct VisaDetailView: View {
                             .background(.regularMaterial, in: Circle())
                         }
                         .disabled(isPreparingShare)
-                        Button { store.toggleSaved(visa) } label: {
+                        Button { handleSaveTapped() } label: {
                             Image(systemName: saved ? "bookmark.fill" : "bookmark")
                                 .font(.system(size: 15))
                                 .foregroundColor(saved ? .white : .primary)
@@ -441,7 +457,7 @@ struct VisaDetailView: View {
             let applyWidth = totalWidth * 2 / 3
 
             HStack(spacing: spacing) {
-                Button { store.toggleSaved(visa) } label: {
+                Button { handleSaveTapped() } label: {
                     HStack(spacing: 6) {
                         Image(systemName: saved ? "bookmark.fill" : "bookmark")
                             .font(.system(size: 15))
