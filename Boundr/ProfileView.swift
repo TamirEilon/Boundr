@@ -1,14 +1,14 @@
 import SwiftUI
+import StoreKit
 import FirebaseAuth
 
 struct ProfileView: View {
     @EnvironmentObject var store: VisaStore
     @EnvironmentObject var auth: AuthManager
+    @Environment(\.openURL) private var openURL
+    @Environment(\.requestReview) private var requestReview
     @Binding var selectedTab: Int
     @Binding var exploreEligibilityFilter: String
-    @State private var showEditProfile = false
-    @State private var showAbout = false
-    @State private var showSettings = false
 
     init(selectedTab: Binding<Int> = .constant(3),
          exploreEligibilityFilter: Binding<String> = .constant("All")) {
@@ -16,188 +16,176 @@ struct ProfileView: View {
         self._exploreEligibilityFilter = exploreEligibilityFilter
     }
 
+    // MARK: - Design tokens
+
+    private let ink       = Color(red: 51/255,  green: 54/255,  blue: 63/255)   // #33363F
+    private let arrow     = Color(red: 173/255, green: 173/255, blue: 173/255)  // #ADADAD
+    private let brandBlue = Color(red: 67/255,  green: 122/255, blue: 244/255)  // #437AF4
+    private let hairline  = Color.black.opacity(0.07)
+
+    private enum Route: Hashable {
+        case editProfile, manageAccount, faq, about, legal
+    }
+
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 20) {
-                    Text("Profile").font(.largeTitle).fontWeight(.bold)
-                        .padding(.horizontal).padding(.top)
+            ScrollView(showsIndicators: false) {
+                VStack(spacing: 0) {
+                    Text("Profile")
+                        .font(.custom("DMSans-SemiBold", size: 18))
+                        .foregroundColor(ink)
+                        .frame(maxWidth: .infinity)
+                        .padding(.top, 8)
+                        .padding(.bottom, 20)
 
-                    userCard
-                    statsRow
-                    profileDetails
-                    actionsList
-                    logOutButton.padding(.bottom, 24)
+                    ratingBanner
+                        .padding(.horizontal, 20)
+                        .padding(.bottom, 8)
+
+                    VStack(spacing: 0) {
+                        navRow(.editProfile,   icon: "icon-edit",          title: "Edit Profile")
+                        divider
+                        navRow(.manageAccount, icon: "icon-account",       title: "Manage Account")
+                        divider
+                        notificationsRow
+                        divider
+                        contactRow
+                        divider
+                        navRow(.faq,           icon: "icon-faq",           title: "FAQ")
+                        divider
+                        navRow(.about,         icon: "icon-about",         title: "About Boundr")
+                        divider
+                        navRow(.legal,         icon: "icon-legal",         title: "Legal Info")
+                        divider
+                        logOutRow
+                    }
+                    .padding(.top, 6)
+                    .padding(.horizontal, 14)
                 }
+                .padding(.bottom, 32)
             }
-            .navigationBarHidden(true)
-            .background(Color(.systemGroupedBackground))
-            .navigationDestination(isPresented: $showEditProfile) {
-                EditProfileView(user: store.user)
-            }
-            .navigationDestination(isPresented: $showAbout) {
-                AboutView()
-            }
-            .navigationDestination(isPresented: $showSettings) {
-                SettingsView()
-            }
-        }
-    }
-
-    // MARK: User Card
-
-    private var displayName: String {
-        auth.currentUser?.displayName ?? store.user.fullName
-    }
-
-    private var profileSubtitle: String {
-        let country = store.user.nationalities.first ?? store.user.homeCountry
-        return "\(country) · \(store.user.age)"
-    }
-
-    private var userCard: some View {
-        HStack(spacing: 16) {
-            Circle().fill(Color.black).frame(width: 60, height: 60)
-                .overlay(
-                    Text(String(displayName.prefix(1)).uppercased())
-                        .font(.title2).fontWeight(.semibold).foregroundColor(.white)
-                )
-
-            VStack(alignment: .leading, spacing: 3) {
-                Text(displayName).font(.headline).fontWeight(.semibold)
-                Text(profileSubtitle)
-                    .font(.subheadline).foregroundColor(.secondary)
-            }
-
-            Spacer()
-        }
-        .padding(16)
-        .background(Color(.systemBackground))
-        .cornerRadius(16)
-        .padding(.horizontal)
-    }
-
-    // MARK: Stats Row
-
-    private var statsRow: some View {
-        HStack(spacing: 10) {
-            statCard(dot: .green, label: "Eligible",      value: "\(store.eligibleVisas.count)",   filter: "Eligible")
-            statCard(dot: .red,   label: "Not yet",       value: "\(store.ineligibleVisas.count)", filter: "Not Eligible")
-            statCard(dot: .blue,  label: "No visa needed",value: "\(store.exemptVisas.count)",     filter: "No Visa Needed")
-        }
-        .padding(.horizontal)
-    }
-
-    private func statCard(dot: Color, label: String, value: String, filter: String) -> some View {
-        Button {
-            exploreEligibilityFilter = filter
-            selectedTab = 1
-        } label: {
-            VStack(alignment: .leading, spacing: 6) {
-                HStack(spacing: 5) {
-                    Circle().fill(dot).frame(width: 7, height: 7)
-                    Text(label).font(.caption).foregroundColor(.secondary)
-                }
-                Text(value).font(.title2).fontWeight(.bold).foregroundColor(.primary)
-            }
-            .frame(maxWidth: .infinity, minHeight: 90, alignment: .leading)
-            .padding(14)
             .background(Color(.systemBackground))
-            .cornerRadius(14)
+            .navigationBarHidden(true)
+            .navigationDestination(for: Route.self) { route in
+                switch route {
+                case .editProfile:   EditProfileView(user: store.user)
+                case .manageAccount: ManageAccountView()
+                case .faq:           FAQView()
+                case .about:         AboutView()
+                case .legal:         LegalInfoView()
+                }
+            }
+        }
+    }
+
+    // MARK: - Rating banner
+
+    private var ratingBanner: some View {
+        Button {
+            requestReview()
+        } label: {
+            HStack(spacing: 14) {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("Rating is caring")
+                        .font(.custom("DMSans-SemiBold", size: 22))
+                        .foregroundColor(.white)
+                    Text("Help us reach more people by\nrating the app")
+                        .font(.custom("DMSans-Regular", size: 14))
+                        .foregroundColor(.white.opacity(0.9))
+                        .lineLimit(2)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                Spacer(minLength: 8)
+                starCluster
+            }
+            .padding(.horizontal, 24)
+            .padding(.vertical, 22)
+            .frame(maxWidth: .infinity, minHeight: 132, alignment: .leading)
+            .background(brandBlue)
+            .cornerRadius(22)
         }
         .buttonStyle(.plain)
     }
 
-    // MARK: Profile Details
-
-    private var profileDetails: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Your profile").font(.headline).fontWeight(.bold).padding(.horizontal)
-
-            VStack(spacing: 0) {
-                detailRow(icon: "book",                      label: "Education",  value: store.user.educationDisplay)
-                Divider().padding(.leading, 44)
-                detailRow(icon: "briefcase",                 label: "Occupation", value: store.user.occupation)
-                Divider().padding(.leading, 44)
-                detailRow(icon: "chart.line.uptrend.xyaxis", label: "Experience", value: "\(store.user.experienceYears) years")
-                Divider().padding(.leading, 44)
-                detailRow(icon: "heart",                     label: "Marital status", value: store.user.maritalStatusDisplay)
-            }
-            .background(Color(.systemBackground))
-            .cornerRadius(16)
-            .padding(.horizontal)
+    private var starCluster: some View {
+        func star(_ size: CGFloat) -> some View {
+            Image("rating-star").resizable().scaledToFit().frame(width: size, height: size)
         }
+        return ZStack {
+            star(38).rotationEffect(.degrees(-20)).offset(x: -26, y: 9)
+            star(38).rotationEffect(.degrees(20)).offset(x: 26, y: 9)
+            star(50).offset(y: -5)
+        }
+        .frame(width: 98, height: 66)
     }
 
-    private func detailRow(icon: String, label: String, value: String) -> some View {
-        HStack {
-            Image(systemName: icon)
-                .font(.system(size: 15)).foregroundColor(.secondary).frame(width: 24)
-            Text(label).font(.subheadline).foregroundColor(.secondary)
+    // MARK: - Rows
+
+    private func navRow(_ route: Route, icon: String, title: String) -> some View {
+        NavigationLink(value: route) {
+            rowContent(icon: icon, title: title)
+        }
+        .buttonStyle(.plain)
+    }
+
+    private var notificationsRow: some View {
+        Button {
+            if let url = URL(string: UIApplication.openNotificationSettingsURLString) {
+                openURL(url)
+            }
+        } label: {
+            rowContent(icon: "icon-notifications", title: "Notifications Settings")
+        }
+        .buttonStyle(.plain)
+    }
+
+    private var contactRow: some View {
+        Button {
+            if let url = URL(string: "https://imaginative-status-057532.framer.app/contact") {
+                openURL(url)
+            }
+        } label: {
+            rowContent(icon: "icon-contact", title: "Contact Us")
+        }
+        .buttonStyle(.plain)
+    }
+
+    private var logOutRow: some View {
+        Button {
+            try? auth.signOut()
+        } label: {
+            rowContent(icon: "icon-logout", title: "Log Out")
+        }
+        .buttonStyle(.plain)
+    }
+
+    private func rowContent(icon: String, title: String) -> some View {
+        HStack(spacing: 16) {
+            Image(icon)
+                .renderingMode(.template)
+                .resizable()
+                .scaledToFit()
+                .foregroundColor(ink)
+                .frame(width: 20, height: 18, alignment: .center)
+            Text(title)
+                .font(.custom("DMSans-SemiBold", size: 15))
+                .foregroundColor(ink)
             Spacer()
-            Text(value).font(.subheadline).fontWeight(.semibold)
-        }
-        .padding(.horizontal, 16).padding(.vertical, 14)
-    }
-
-    // MARK: Actions
-
-    private var actionsList: some View {
-        VStack(spacing: 0) {
-            Button { showEditProfile = true } label: {
-                actionRow(icon: "pencil", title: "Edit profile", subtitle: "Update what we match against")
-            }
-            .buttonStyle(.plain)
-            Divider().padding(.leading, 56)
-            Button { showSettings = true } label: {
-                actionRow(icon: "gearshape", title: "Settings", subtitle: "Notifications, privacy & more")
-            }
-            .buttonStyle(.plain)
-            Divider().padding(.leading, 56)
-            Button { showAbout = true } label: {
-                actionRow(icon: "info.circle", title: "About Boundr", subtitle: "Version 1.0")
-            }
-            .buttonStyle(.plain)
-        }
-        .background(Color(.systemBackground))
-        .cornerRadius(16)
-        .padding(.horizontal)
-    }
-
-    private func actionRow(icon: String, title: String, subtitle: String) -> some View {
-        HStack(spacing: 14) {
-            Image(systemName: icon)
-                .font(.system(size: 16)).foregroundColor(.primary)
-                .frame(width: 32, height: 32)
-                .background(Color(.systemGray6)).cornerRadius(8)
-
-            VStack(alignment: .leading, spacing: 2) {
-                Text(title).font(.subheadline).fontWeight(.semibold)
-                Text(subtitle).font(.caption).foregroundColor(.secondary)
-            }
-
-            Spacer()
-
-
             Image(systemName: "chevron.right")
-                .font(.caption).foregroundColor(Color(.systemGray3))
+                .font(.system(size: 15, weight: .semibold))
+                .foregroundColor(arrow)
         }
-        .padding(.horizontal, 16).padding(.vertical, 14)
+        .padding(.horizontal, 20)
+        .padding(.vertical, 23)
         .contentShape(Rectangle())
     }
 
-    // MARK: Log Out
-
-    private var logOutButton: some View {
-        Button { try? auth.signOut() } label: {
-            HStack(spacing: 8) {
-                Image(systemName: "rectangle.portrait.and.arrow.right").font(.system(size: 15))
-                Text("Log out").font(.subheadline).fontWeight(.semibold)
-            }
-            .foregroundColor(.red)
-        }
-        .frame(maxWidth: .infinity)
-        .padding(.top, 4)
+    private var divider: some View {
+        Rectangle()
+            .fill(hairline)
+            .frame(height: 1)
+            .padding(.leading, 20)
+            .padding(.trailing, 20)
     }
 }
 

@@ -91,14 +91,24 @@ struct EditProfileView: View {
         ("married_with_kids",  "Married with kids")
     ]
 
+    // MARK: - Design tokens
+
+    private let ink         = Color(red: 51/255,  green: 54/255,  blue: 63/255)    // #33363F
+    private let fieldBorder = Color(red: 0.90, green: 0.90, blue: 0.91)
+    private let labelGray   = Color(red: 0.44, green: 0.45, blue: 0.49)
+
+    private func dm(_ size: CGFloat, _ semibold: Bool = false) -> Font {
+        Font.custom(semibold ? "DMSans-SemiBold" : "DMSans-Regular", size: size)
+    }
+
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
-                formField(label: "Nationality (up to 3)") {
+            VStack(alignment: .leading, spacing: 22) {
+                formField(label: "Nationalities (Up to 3 nationalities)") {
                     nationalityField
                 }
 
-                formField(label: "Where do you live?") {
+                formField(label: "Country of residence") {
                     homeCountryField
                 }
 
@@ -119,12 +129,13 @@ struct EditProfileView: View {
                                   display: { $0 })
                         if draft.occupation == "Other" {
                             TextField("Job title", text: $otherOccupation)
-                                .font(.body)
+                                .font(dm(16))
+                                .foregroundColor(ink)
                                 .padding(.horizontal, 16)
                                 .padding(.vertical, 16)
                                 .background(Color(.systemBackground))
-                                .cornerRadius(16)
-                                .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color(.systemGray5), lineWidth: 1))
+                                .cornerRadius(14)
+                                .overlay(RoundedRectangle(cornerRadius: 14).stroke(fieldBorder, lineWidth: 1.5))
                                 .transition(.opacity.combined(with: .move(edge: .top)))
                         }
                     }
@@ -144,30 +155,7 @@ struct EditProfileView: View {
 
                 if draft.relationshipStatus != "single" {
                     formField(label: "Number of kids") {
-                        HStack(spacing: 0) {
-                            Button {
-                                if draft.numberOfKids > 0 { draft.numberOfKids -= 1 }
-                            } label: {
-                                Image(systemName: "minus")
-                                    .font(.system(size: 16, weight: .semibold))
-                                    .frame(width: 52, height: 52)
-                                    .foregroundColor(draft.numberOfKids == 0 ? Color(.systemGray3) : .primary)
-                            }
-                            Text("\(draft.numberOfKids)")
-                                .font(.title3).fontWeight(.semibold)
-                                .frame(maxWidth: .infinity)
-                            Button {
-                                draft.numberOfKids += 1
-                            } label: {
-                                Image(systemName: "plus")
-                                    .font(.system(size: 16, weight: .semibold))
-                                    .frame(width: 52, height: 52)
-                                    .foregroundColor(.primary)
-                            }
-                        }
-                        .background(Color(.systemBackground))
-                        .cornerRadius(16)
-                        .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color(.systemGray5), lineWidth: 1))
+                        kidsStepper
                     }
                     .transition(.opacity.combined(with: .move(edge: .top)))
                 }
@@ -185,24 +173,25 @@ struct EditProfileView: View {
                 Button { dismiss() } label: {
                     Image(systemName: "chevron.left")
                         .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(.primary)
+                        .foregroundColor(ink)
                         .frame(width: 34, height: 34)
                         .background(Color(.systemGray6), in: Circle())
                 }
             }
             ToolbarItem(placement: .principal) {
-                Text("Edit profile").font(.headline).fontWeight(.bold)
+                Text("Edit Profile").font(dm(18, true)).foregroundColor(ink)
             }
             ToolbarItem(placement: .navigationBarTrailing) {
-                Button("Save") {
+                Button {
                     var saved = draft
                     if saved.occupation == "Other" && !otherOccupation.trimmingCharacters(in: .whitespaces).isEmpty {
                         saved.occupation = otherOccupation.trimmingCharacters(in: .whitespaces)
                     }
                     store.user = saved
                     dismiss()
+                } label: {
+                    Text("Save").font(dm(16, true)).foregroundColor(ink)
                 }
-                .font(.subheadline).fontWeight(.semibold)
             }
         }
     }
@@ -213,8 +202,8 @@ struct EditProfileView: View {
     private func formField(label: String, @ViewBuilder content: () -> some View) -> some View {
         VStack(alignment: .leading, spacing: 10) {
             Text(label)
-                .font(.caption)
-                .foregroundColor(Color(.systemGray))
+                .font(dm(13))
+                .foregroundColor(labelGray)
             content()
         }
     }
@@ -229,30 +218,58 @@ struct EditProfileView: View {
         } label: {
             HStack {
                 Text(display(selection.wrappedValue))
-                    .font(.subheadline).fontWeight(.semibold)
-                    .foregroundColor(.primary)
+                    .font(dm(16))
+                    .foregroundColor(ink)
                 Spacer()
                 Image(systemName: "chevron.down")
-                    .font(.system(size: 13, weight: .medium))
-                    .foregroundColor(.secondary)
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(ink)
             }
             .padding(.horizontal, 16)
-            .padding(.vertical, 14)
+            .padding(.vertical, 16)
             .background(Color(.systemBackground))
-            .cornerRadius(16)
-            .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color(.systemGray5), lineWidth: 1))
+            .cornerRadius(14)
+            .overlay(RoundedRectangle(cornerRadius: 14).stroke(fieldBorder, lineWidth: 1.5))
         }
     }
 
     private func textRow(value: Binding<String>, keyboard: UIKeyboardType) -> some View {
         TextField("", text: value)
-            .font(.subheadline).fontWeight(.semibold)
+            .font(dm(16))
+            .foregroundColor(ink)
             .keyboardType(keyboard)
             .padding(.horizontal, 16)
-            .padding(.vertical, 14)
+            .padding(.vertical, 16)
             .background(Color(.systemBackground))
-            .cornerRadius(16)
-            .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color(.systemGray5), lineWidth: 1))
+            .cornerRadius(14)
+            .overlay(RoundedRectangle(cornerRadius: 14).stroke(fieldBorder, lineWidth: 1.5))
+    }
+
+    private var kidsStepper: some View {
+        HStack(spacing: 0) {
+            Button {
+                if draft.numberOfKids > 0 { draft.numberOfKids -= 1 }
+            } label: {
+                Image(systemName: "minus")
+                    .font(.system(size: 16, weight: .semibold))
+                    .frame(width: 52, height: 54)
+                    .foregroundColor(draft.numberOfKids == 0 ? Color(.systemGray3) : ink)
+            }
+            Text("\(draft.numberOfKids)")
+                .font(dm(18, true)).foregroundColor(ink)
+                .frame(maxWidth: .infinity)
+            Button {
+                draft.numberOfKids += 1
+            } label: {
+                Image(systemName: "plus")
+                    .font(.system(size: 16, weight: .semibold))
+                    .frame(width: 52, height: 54)
+                    .foregroundColor(ink)
+            }
+        }
+        .background(Color(.systemBackground))
+        .cornerRadius(14)
+        .overlay(RoundedRectangle(cornerRadius: 14).stroke(fieldBorder, lineWidth: 1.5))
     }
 
     private var filteredCountries: [String] {
@@ -267,18 +284,18 @@ struct EditProfileView: View {
         } label: {
             HStack {
                 Text(draft.homeCountry.isEmpty ? "Select country" : draft.homeCountry)
-                    .font(.subheadline).fontWeight(.semibold)
-                    .foregroundColor(draft.homeCountry.isEmpty ? Color(.systemGray3) : .primary)
+                    .font(dm(16))
+                    .foregroundColor(draft.homeCountry.isEmpty ? Color(.systemGray3) : ink)
                 Spacer()
                 Image(systemName: "chevron.down")
-                    .font(.system(size: 13, weight: .medium))
-                    .foregroundColor(.secondary)
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(ink)
             }
             .padding(.horizontal, 16)
-            .padding(.vertical, 14)
+            .padding(.vertical, 16)
             .background(Color(.systemBackground))
-            .cornerRadius(16)
-            .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color(.systemGray5), lineWidth: 1))
+            .cornerRadius(14)
+            .overlay(RoundedRectangle(cornerRadius: 14).stroke(fieldBorder, lineWidth: 1.5))
         }
         .sheet(isPresented: $showCountryPicker) {
             NavigationStack {
@@ -309,15 +326,15 @@ struct EditProfileView: View {
                 let isSelected = draft.relationshipStatus == option.key
                 Button { draft.relationshipStatus = option.key } label: {
                     Text(option.label)
-                        .font(.subheadline).fontWeight(.semibold)
-                        .foregroundColor(isSelected ? .white : .primary)
+                        .font(dm(15, isSelected))
+                        .foregroundColor(isSelected ? .white : ink)
                         .frame(maxWidth: .infinity)
-                        .padding(.vertical, 16)
-                        .background(isSelected ? Color.black : Color(.systemBackground))
-                        .cornerRadius(16)
+                        .padding(.vertical, 17)
+                        .background(isSelected ? ink : Color(.systemBackground))
+                        .cornerRadius(14)
                         .overlay(
-                            RoundedRectangle(cornerRadius: 16)
-                                .stroke(isSelected ? Color.clear : Color(.systemGray5), lineWidth: 1)
+                            RoundedRectangle(cornerRadius: 14)
+                                .stroke(isSelected ? Color.clear : fieldBorder, lineWidth: 1.5)
                         )
                 }
             }
@@ -335,9 +352,9 @@ struct EditProfileView: View {
             if !draft.nationalities.isEmpty {
                 FlowLayout(spacing: 8) {
                     ForEach(draft.nationalities, id: \.self) { nat in
-                        HStack(spacing: 5) {
+                        HStack(spacing: 6) {
                             Text(nat)
-                                .font(.subheadline).fontWeight(.medium)
+                                .font(dm(14))
                             Button {
                                 draft.nationalities.removeAll { $0 == nat }
                             } label: {
@@ -346,8 +363,8 @@ struct EditProfileView: View {
                             }
                         }
                         .foregroundColor(.white)
-                        .padding(.horizontal, 12).padding(.vertical, 8)
-                        .background(Color.black)
+                        .padding(.horizontal, 14).padding(.vertical, 9)
+                        .background(ink)
                         .cornerRadius(20)
                     }
                 }
@@ -358,19 +375,19 @@ struct EditProfileView: View {
                     nationalitySearch = ""
                     showNationalityPicker = true
                 } label: {
-                    HStack(spacing: 6) {
+                    HStack(spacing: 8) {
                         Image(systemName: "plus")
-                            .font(.system(size: 12, weight: .semibold))
-                        Text("Add nationality")
-                            .font(.subheadline).fontWeight(.medium)
+                            .font(.system(size: 14, weight: .semibold))
+                        Text("Add Nationality")
+                            .font(dm(16))
                     }
-                    .foregroundColor(.primary)
-                    .padding(.horizontal, 16).padding(.vertical, 14)
+                    .foregroundColor(ink)
+                    .padding(.horizontal, 16).padding(.vertical, 16)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .background(Color(.systemBackground))
-                    .cornerRadius(16)
-                    .overlay(RoundedRectangle(cornerRadius: 16)
-                        .stroke(Color(.systemGray5), lineWidth: 1))
+                    .cornerRadius(14)
+                    .overlay(RoundedRectangle(cornerRadius: 14)
+                        .stroke(fieldBorder, lineWidth: 1.5))
                 }
                 .sheet(isPresented: $showNationalityPicker) {
                     NavigationStack {

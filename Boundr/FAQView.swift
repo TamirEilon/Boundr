@@ -18,25 +18,34 @@ struct FAQView: View {
         ),
         (
             "Can I save visas I'm interested in?",
-            "Yes! Click the bookmark icon on any visa card or detail page to save it to your personal list."
+            "Yes! Tap the bookmark icon on any visa card or detail page to save it to your personal list."
         ),
         (
-            "How do I update my profile information?",
-            "Go to Profile Settings from the user menu, then click 'Edit Info' to update your eligibility details."
+            "How do i update my profile information?",
+            "Go to \"Edit Profile\" page from the \"Profile Page\", then feel free to adjust the information as you please"
         )
     ]
 
     @State private var expanded: Set<Int> = []
 
+    private let ink      = Color(red: 51/255,  green: 54/255,  blue: 63/255)   // #33363F
+    private let arrow    = Color(red: 173/255, green: 173/255, blue: 173/255)  // #ADADAD
+    private let answerGray = Color(red: 0.56, green: 0.57, blue: 0.60)
+    private let hairline = Color.black.opacity(0.08)
+
+    private func dm(_ size: CGFloat, _ semibold: Bool = false) -> Font {
+        Font.custom(semibold ? "DMSans-SemiBold" : "DMSans-Regular", size: size)
+    }
+
     var body: some View {
-        ScrollView {
-            VStack(spacing: 10) {
+        ScrollView(showsIndicators: false) {
+            VStack(spacing: 0) {
                 ForEach(faqs.indices, id: \.self) { i in
                     faqItem(index: i)
                 }
             }
-            .padding(.horizontal, 20)
-            .padding(.top, 16)
+            .padding(.horizontal, 24)
+            .padding(.top, 8)
             .padding(.bottom, 40)
         }
         .background(Color(.systemBackground))
@@ -47,13 +56,13 @@ struct FAQView: View {
                 Button { dismiss() } label: {
                     Image(systemName: "chevron.left")
                         .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(.primary)
+                        .foregroundColor(ink)
                         .frame(width: 34, height: 34)
                         .background(Color(.systemGray6), in: Circle())
                 }
             }
             ToolbarItem(placement: .principal) {
-                Text("FAQ").font(.headline).fontWeight(.bold)
+                Text("FAQs").font(dm(18, true)).foregroundColor(ink)
             }
         }
     }
@@ -66,38 +75,37 @@ struct FAQView: View {
                     if isOpen { expanded.remove(index) } else { expanded.insert(index) }
                 }
             } label: {
-                HStack(spacing: 12) {
+                HStack(alignment: .top, spacing: 12) {
                     Text(faqs[index].question)
-                        .font(.subheadline).fontWeight(.semibold)
-                        .foregroundColor(.primary)
+                        .font(dm(15, true))
+                        .foregroundColor(ink)
                         .multilineTextAlignment(.leading)
                         .fixedSize(horizontal: false, vertical: true)
                     Spacer()
                     Image(systemName: "chevron.down")
-                        .font(.system(size: 13, weight: .semibold))
-                        .foregroundColor(Color(.systemGray3))
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundColor(arrow)
                         .rotationEffect(.degrees(isOpen ? 180 : 0))
+                        .padding(.top, 1)
                 }
-                .padding(.horizontal, 16)
-                .padding(.vertical, 16)
+                .padding(.vertical, 20)
+                .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
 
             if isOpen {
-                Divider().padding(.horizontal, 16)
                 Text(faqs[index].answer)
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
+                    .font(dm(14))
+                    .foregroundColor(answerGray)
+                    .lineSpacing(3)
                     .fixedSize(horizontal: false, vertical: true)
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 14)
                     .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.bottom, 20)
                     .transition(.opacity.combined(with: .move(edge: .top)))
             }
+
+            Rectangle().fill(hairline).frame(height: 1)
         }
-        .background(Color(.systemBackground))
-        .cornerRadius(16)
-        .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color(.systemGray5), lineWidth: 1))
     }
 }
 
