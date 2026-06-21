@@ -7,21 +7,41 @@ struct ContentView: View {
     @State private var selectedTab               = 0
     @State private var exploreEligibilityFilter  = "All"
 
+    private static let tabInk = Color(red: 51/255, green: 54/255, blue: 63/255)  // #33363F
+
+    init() {
+        // Icon-only tab bar. Both states are #33363F — they differ by shape
+        // (outline when unselected, filled when selected), not by color.
+        let ink = UIColor(red: 51/255, green: 54/255, blue: 63/255, alpha: 1)   // #33363F
+        let appearance = UITabBarAppearance()
+        appearance.configureWithDefaultBackground()
+        for layout in [appearance.stackedLayoutAppearance,
+                       appearance.inlineLayoutAppearance,
+                       appearance.compactInlineLayoutAppearance] {
+            layout.normal.iconColor   = ink
+            layout.selected.iconColor = ink
+        }
+        UITabBar.appearance().standardAppearance = appearance
+        UITabBar.appearance().scrollEdgeAppearance = appearance
+        UITabBar.appearance().unselectedItemTintColor = ink
+    }
+
     var body: some View {
         TabView(selection: $selectedTab) {
             HomeView(selectedTab: $selectedTab)
-                .tabItem { Label("Home", systemImage: "house.fill") }
+                .tabItem { Image(selectedTab == 0 ? "tab-home-fill" : "tab-home") }
                 .tag(0)
             ExploreView(eligibilityFilter: $exploreEligibilityFilter)
-                .tabItem { Label("Explore", systemImage: "safari") }
+                .tabItem { Image(selectedTab == 1 ? "tab-explore-fill" : "tab-explore") }
                 .tag(1)
             SavedView()
-                .tabItem { Label("Saved", systemImage: "bookmark") }
+                .tabItem { Image(selectedTab == 2 ? "tab-saved-fill" : "tab-saved") }
                 .tag(2)
             ProfileView(selectedTab: $selectedTab, exploreEligibilityFilter: $exploreEligibilityFilter)
-                .tabItem { Label("Profile", systemImage: "person") }
+                .tabItem { Image(selectedTab == 3 ? "tab-profile-fill" : "tab-profile") }
                 .tag(3)
         }
+        .tint(Self.tabInk)   // selected tab = #33363F (filled), not blue
     }
 }
 
