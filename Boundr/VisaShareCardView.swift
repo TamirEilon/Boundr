@@ -99,7 +99,7 @@ struct VisaShareCardView: View {
                 .foregroundColor(.secondary)
             Text(value)
                 .font(.system(size: 12, weight: .bold))
-                .foregroundColor(.primary)
+                .foregroundColor(.ink)
                 .fixedSize(horizontal: false, vertical: true)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
@@ -122,7 +122,7 @@ struct VisaShareCardView: View {
                 VStack(alignment: .leading, spacing: 1) {
                     Text("Boundr")
                         .font(.system(size: 13, weight: .bold))
-                        .foregroundColor(.primary)
+                        .foregroundColor(.ink)
                     Text("Discover your next visa")
                         .font(.system(size: 11))
                         .foregroundColor(.secondary)

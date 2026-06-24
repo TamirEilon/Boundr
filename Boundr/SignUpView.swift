@@ -190,7 +190,7 @@ struct SignUpView: View {
                 Button { dismiss() } label: {
                     Image(systemName: "chevron.left")
                         .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(.primary)
+                        .foregroundColor(.ink)
                         .frame(width: 34, height: 34)
                         .background(Color(.systemGray6), in: Circle())
                 }

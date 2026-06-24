@@ -44,7 +44,7 @@ struct LegalPageView: View {
                 Button { dismiss() } label: {
                     Image(systemName: "chevron.left")
                         .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(.primary)
+                        .foregroundColor(.ink)
                         .frame(width: 38, height: 38)
                         .background(Color(.systemGray6), in: Circle())
                 }

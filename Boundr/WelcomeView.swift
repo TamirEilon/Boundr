@@ -64,7 +64,7 @@ struct WelcomeView: View {
                         } label: {
                             Text("I already have an account")
                                 .font(.subheadline).fontWeight(.semibold)
-                                .foregroundColor(.primary)
+                                .foregroundColor(.ink)
                         }
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 6)

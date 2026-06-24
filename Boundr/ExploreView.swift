@@ -84,17 +84,21 @@ struct ExploreView: View {
             VStack(alignment: .leading, spacing: 0) {
 
                 // Header
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Explore").font(.largeTitle).fontWeight(.bold)
-                    Text("\(filteredVisas.count) visas").font(.subheadline).foregroundColor(.secondary)
+                VStack(spacing: 2) {
+                    Text("Explore")
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundColor(.ink)
+                    Text("\(filteredVisas.count) visas")
+                        .font(.sfR(15)).tracking(-0.45).foregroundColor(.secondary)
                 }
-                .padding(.horizontal).padding(.top).padding(.bottom, 16)
+                .frame(maxWidth: .infinity)
+                .padding(.top, 8).padding(.bottom, 16)
 
                 // Search
                 HStack(spacing: 8) {
                     Image(systemName: "magnifyingglass").foregroundColor(.secondary)
                     TextField("Search countries or visa types", text: $searchText)
-                        .font(.subheadline)
+                        .font(.sfR(15)).tracking(-0.45)
                     if !searchText.isEmpty {
                         Button { searchText = "" } label: {
                             Image(systemName: "xmark.circle.fill").foregroundColor(.secondary)
@@ -212,7 +216,7 @@ struct ExploreView: View {
                 if filteredVisas.isEmpty {
                     VStack(spacing: 16) {
                         Text("No visas match your filters")
-                            .font(.subheadline)
+                            .font(.sfR(15)).tracking(-0.45)
                             .foregroundColor(.secondary)
                         Button {
                             searchText          = ""
@@ -222,7 +226,7 @@ struct ExploreView: View {
                             sortOption          = .none
                         } label: {
                             Text("Clear filters")
-                                .font(.subheadline)
+                                .font(.sfR(15)).tracking(-0.45)
                                 .foregroundColor(.secondary)
                                 .padding(.horizontal, 24).padding(.vertical, 12)
                                 .background(Color(.systemGray5))
@@ -260,8 +264,8 @@ struct ExploreView: View {
     private func dropdownLabel(title: String, isActive: Bool) -> some View {
         HStack(spacing: 4) {
             Text(title)
-                .font(.subheadline)
-                .fontWeight(isActive ? .semibold : .regular)
+                .font(isActive ? .sfSB(15) : .sfR(15))
+                .tracking(-0.45)
                 .lineLimit(1)
                 .truncationMode(.tail)
             Image(systemName: "chevron.down")
@@ -324,14 +328,14 @@ struct VisaListRow: View {
                     .frame(width: 52, height: 52)
                     .overlay(
                         Text(visa.countryCode)
-                            .font(.subheadline).fontWeight(.semibold).foregroundColor(.primary)
+                            .font(.sfSB(15)).tracking(-0.45).foregroundColor(.ink)
                     )
 
                 VStack(alignment: .leading, spacing: 2) {
                     Text(visa.country.uppercased())
-                        .font(.caption2).foregroundColor(.secondary).tracking(0.5)
+                        .font(.sfR(11)).tracking(-0.33).foregroundColor(.secondary).tracking(0.5)
                     Text(visa.visaName)
-                        .font(.subheadline).fontWeight(.semibold)
+                        .font(.sfSB(15)).tracking(-0.45)
                         .lineLimit(2)
                         .fixedSize(horizontal: false, vertical: true)
                 }
@@ -341,7 +345,7 @@ struct VisaListRow: View {
                 HStack(spacing: 4) {
                     Circle().fill(tagColor).frame(width: 6, height: 6)
                     Text(tagLabel)
-                        .font(.caption).fontWeight(.medium)
+                        .font(.sfSB(12)).tracking(-0.36)
                         .foregroundColor(tagColor)
                 }
                 .padding(.horizontal, 10).padding(.vertical, 5)
@@ -372,13 +376,12 @@ struct VisaListRow: View {
                 .foregroundColor(.secondary)
                 .frame(width: 14)
             Text(label)
-                .font(.caption)
+                .font(.sfR(12)).tracking(-0.36)
                 .foregroundColor(.secondary)
             Spacer()
             Text(value)
-                .font(.caption)
-                .fontWeight(.medium)
-                .foregroundColor(.primary)
+                .font(.sfSB(12)).tracking(-0.36)
+                .foregroundColor(.ink)
                 .multilineTextAlignment(.trailing)
         }
     }

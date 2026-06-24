@@ -9,7 +9,7 @@ struct LegalInfoView: View {
     private let hairline = Color.black.opacity(0.08)
 
     private func dm(_ size: CGFloat, _ semibold: Bool = false) -> Font {
-        Font.custom(semibold ? "DMSans-SemiBold" : "DMSans-Regular", size: size)
+        .system(size: size, weight: semibold ? .semibold : .regular)
     }
 
     private let items: [(title: String, url: String)] = [
@@ -50,7 +50,7 @@ struct LegalInfoView: View {
                 }
             }
             ToolbarItem(placement: .principal) {
-                Text("Legal Info").font(dm(18, true)).foregroundColor(ink)
+                Text("Legal Info").font(dm(18, true)).tracking(-0.54).foregroundColor(ink)
             }
         }
     }
@@ -58,7 +58,7 @@ struct LegalInfoView: View {
     private func row(title: String) -> some View {
         HStack {
             Text(title)
-                .font(dm(15, true))
+                .font(dm(15, true)).tracking(-0.45)
                 .foregroundColor(ink)
             Spacer()
             Image(systemName: "chevron.right")

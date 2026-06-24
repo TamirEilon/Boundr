@@ -11,7 +11,7 @@ struct AboutView: View {
     private let footGray  = Color(red: 0.56, green: 0.57, blue: 0.60)
 
     private func dm(_ size: CGFloat, _ semibold: Bool = false) -> Font {
-        Font.custom(semibold ? "DMSans-SemiBold" : "DMSans-Regular", size: size)
+        .system(size: size, weight: semibold ? .semibold : .regular)
     }
 
     var body: some View {
@@ -27,12 +27,12 @@ struct AboutView: View {
 
                 // Blue card
                 VStack(alignment: .leading, spacing: 14) {
-                    (Text("Visas, ").font(dm(26, true))
-                     + Text("simplified").font(dm(26, true)).italic())
+                    (Text("Visas, ").font(dm(26, true)).tracking(-0.78)
+                     + Text("simplified").font(dm(26, true)).tracking(-0.78).italic())
                         .foregroundColor(.white)
 
                     Text("Boundr helps you discover visa opportunities based on your profile, goals and future plans – all in one place. We simplify the complex world of immigration by turning scattered requirements into clear, personalized insights you can understand in minutes.")
-                        .font(dm(15))
+                        .font(dm(15)).tracking(-0.45)
                         .foregroundColor(.white.opacity(0.92))
                         .lineSpacing(4)
                         .fixedSize(horizontal: false, vertical: true)
@@ -47,7 +47,7 @@ struct AboutView: View {
                     Text("Version \(appVersion) – Build \(buildNumber)")
                     Text("© Copyright Boundr. All rights reserved")
                 }
-                .font(dm(13))
+                .font(dm(13)).tracking(-0.39)
                 .foregroundColor(footGray)
                 .multilineTextAlignment(.center)
                 .frame(maxWidth: .infinity)
@@ -70,7 +70,7 @@ struct AboutView: View {
                 }
             }
             ToolbarItem(placement: .principal) {
-                Text("About Boundr").font(dm(18, true)).foregroundColor(ink)
+                Text("About Boundr").font(dm(18, true)).tracking(-0.54).foregroundColor(ink)
             }
         }
     }

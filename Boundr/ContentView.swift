@@ -1,6 +1,17 @@
 import SwiftUI
 import FirebaseAuth
 
+extension Color {
+    static let ink = Color(red: 51/255, green: 54/255, blue: 63/255)  // #33363F
+}
+
+extension Font {
+    // SF Pro (system) helpers used across the app.
+    static func sfR(_ size: CGFloat)  -> Font { .system(size: size, weight: .regular) }
+    static func sfSB(_ size: CGFloat) -> Font { .system(size: size, weight: .semibold) }
+    static func sfB(_ size: CGFloat)  -> Font { .system(size: size, weight: .bold) }
+}
+
 // MARK: - ContentView
 
 struct ContentView: View {
@@ -96,18 +107,19 @@ struct HomeView: View {
     private var headerSection: some View {
         HStack(alignment: .center) {
             VStack(alignment: .leading, spacing: 2) {
-                Text(greeting).font(.subheadline).foregroundColor(.secondary)
-                Text("Hey, \(firstName)").font(.title).fontWeight(.bold)
+                Text(greeting).font(.sfR(15)).tracking(-0.45).foregroundColor(.secondary)
+                Text(firstName).font(.sfB(26)).tracking(-0.78).foregroundColor(.ink)
             }
             Spacer()
-            Button { selectedTab = 3 } label: {
-                Circle().fill(Color.black).frame(width: 40, height: 40)
-                    .overlay(
-                        Text(String((auth.currentUser?.displayName ?? store.user.fullName).prefix(1)).uppercased())
-                            .font(.headline).foregroundColor(.white)
-                    )
-            }
-            .buttonStyle(.plain)
+            Circle().fill(Color.black).frame(width: 40, height: 40)
+                .overlay(
+                    Text(String((auth.currentUser?.displayName ?? store.user.fullName).prefix(1)).uppercased())
+                        .font(.sfSB(17)).tracking(-0.51).foregroundColor(.white)
+                )
+                .contentShape(Circle())
+                .onTapGesture { selectedTab = 3 }
+                .accessibilityAddTraits(.isButton)
+                .accessibilityLabel("Profile")
         }
         .padding(.horizontal).padding(.top)
     }
@@ -119,6 +131,7 @@ struct HomeView: View {
         if let visa = store.topMatch {
             NavigationLink(value: visa) {
                 TopMatchCard(visa: visa, isEligible: store.topMatchIsEligible)
+                    .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
             .padding(.horizontal)
@@ -133,7 +146,7 @@ struct HomeView: View {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 12) {
                     ForEach(store.eligibleVisas.prefix(10)) { visa in
-                        NavigationLink(value: visa) { EligibleVisaCard(visa: visa) }
+                        NavigationLink(value: visa) { EligibleVisaCard(visa: visa).contentShape(Rectangle()) }
                             .buttonStyle(.plain)
                     }
                 }
@@ -150,13 +163,13 @@ struct HomeView: View {
             VStack(alignment: .leading, spacing: 2) {
                 sectionHeader("Visas to work toward")
                 Text("You don't qualify yet — here's what's close.")
-                    .font(.caption).foregroundColor(.secondary)
+                    .font(.sfR(12)).tracking(-0.36).foregroundColor(.secondary)
                     .padding(.horizontal)
             }
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 12) {
                     ForEach(store.ineligibleVisas.prefix(10)) { visa in
-                        NavigationLink(value: visa) { WorkTowardCard(visa: visa) }
+                        NavigationLink(value: visa) { WorkTowardCard(visa: visa).contentShape(Rectangle()) }
                             .buttonStyle(.plain)
                     }
                 }
@@ -171,12 +184,12 @@ struct HomeView: View {
     private var workingTowardSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Worth working toward")
-                .font(.headline).fontWeight(.bold)
+                .font(.sfSB(17)).tracking(-0.51).foregroundColor(.ink)
                 .padding(.horizontal)
             VStack(spacing: 10) {
                 ForEach(store.ineligibleVisas.prefix(3)) { visa in
                     NavigationLink(value: visa) {
-                        WorkingTowardRow(visa: visa).padding(.horizontal)
+                        WorkingTowardRow(visa: visa).padding(.horizontal).contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
                 }
@@ -189,12 +202,12 @@ struct HomeView: View {
     private var recentlyViewedSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Recently viewed")
-                .font(.headline).fontWeight(.bold)
+                .font(.sfSB(17)).tracking(-0.51).foregroundColor(.ink)
                 .padding(.horizontal)
             VStack(spacing: 10) {
                 ForEach(store.recentlyViewedVisas.prefix(5)) { visa in
                     NavigationLink(value: visa) {
-                        WorkingTowardRow(visa: visa, eligibility: store.eligibility(visa)).padding(.horizontal)
+                        WorkingTowardRow(visa: visa, eligibility: store.eligibility(visa)).padding(.horizontal).contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
                 }
@@ -203,7 +216,7 @@ struct HomeView: View {
     }
 
     private func sectionHeader(_ title: String) -> some View {
-        Text(title).font(.headline).fontWeight(.bold)
+        Text(title).font(.sfSB(17)).tracking(-0.51).foregroundColor(.ink)
             .padding(.horizontal)
     }
 }
@@ -228,7 +241,7 @@ struct TopMatchCard: View {
             HStack(spacing: 4) {
                 Image(systemName: isEligible ? "sparkle" : "lock").font(.caption)
                 Text(isEligible ? "TOP MATCH" : "EXPLORE")
-                    .font(.caption).fontWeight(.semibold).tracking(1.2)
+                    .font(.sfSB(12)).tracking(-0.36).tracking(1.2)
             }
             .foregroundColor(.white.opacity(0.85))
 
@@ -237,20 +250,20 @@ struct TopMatchCard: View {
             // Content
             VStack(alignment: .leading, spacing: 8) {
                 Text(visa.country.uppercased())
-                    .font(.caption).fontWeight(.medium).foregroundColor(.white.opacity(0.75))
+                    .font(.sfR(12)).tracking(-0.36).foregroundColor(.white.opacity(0.75))
 
                 Text(visa.visaName)
-                    .font(.title2).fontWeight(.bold).foregroundColor(.white)
+                    .font(.sfSB(22)).tracking(-0.66).foregroundColor(.white)
                     .lineLimit(2)
 
                 Text(visa.description)
-                    .font(.subheadline).foregroundColor(.white.opacity(0.8)).lineLimit(2)
+                    .font(.sfR(14)).tracking(-0.42).foregroundColor(.white.opacity(0.8)).lineLimit(2)
 
                 HStack(spacing: 16) {
                     Label(visa.processingTime, systemImage: "clock")
-                        .font(.caption).lineLimit(1)
+                        .font(.sfR(12)).tracking(-0.36).lineLimit(1)
                     Label(visa.cost, systemImage: "creditcard")
-                        .font(.caption).lineLimit(1).truncationMode(.tail)
+                        .font(.sfR(12)).tracking(-0.36).lineLimit(1).truncationMode(.tail)
                     Spacer(minLength: 8)
                     Image(systemName: "arrow.right")
                         .font(.system(size: 15, weight: .semibold)).foregroundColor(.white)
@@ -292,18 +305,18 @@ struct EligibleVisaCard: View {
                 .frame(width: 48, height: 48)
                 .overlay(
                     Text(visa.countryCode)
-                        .font(.subheadline).fontWeight(.semibold).foregroundColor(.primary)
+                        .font(.sfSB(15)).tracking(-0.45).foregroundColor(.ink)
                 )
 
             Text(visa.country.uppercased())
-                .font(.caption2).foregroundColor(.secondary).tracking(0.5)
+                .font(.sfR(11)).tracking(-0.33).foregroundColor(.secondary).tracking(0.5)
 
             Text(visa.visaName)
-                .font(.subheadline).fontWeight(.semibold).lineLimit(2)
+                .font(.sfSB(15)).tracking(-0.45).lineLimit(2).foregroundColor(.ink)
 
             HStack(spacing: 4) {
                 Circle().fill(Color.green).frame(width: 6, height: 6)
-                Text(visa.duration).font(.caption).foregroundColor(.secondary).lineLimit(1)
+                Text(visa.duration).font(.sfR(12)).tracking(-0.36).foregroundColor(.secondary).lineLimit(1)
             }
         }
         .padding(14)
@@ -328,7 +341,7 @@ struct WorkTowardCard: View {
                     .frame(width: 48, height: 48)
                     .overlay(
                         Text(visa.countryCode)
-                            .font(.subheadline).fontWeight(.semibold)
+                            .font(.sfSB(15)).tracking(-0.45)
                             .foregroundColor(Color(.systemGray2))
                     )
                 Image(systemName: "lock.fill")
@@ -341,15 +354,15 @@ struct WorkTowardCard: View {
             }
 
             Text(visa.country.uppercased())
-                .font(.caption2).foregroundColor(.secondary).tracking(0.5)
+                .font(.sfR(11)).tracking(-0.33).foregroundColor(.secondary).tracking(0.5)
 
             Text(visa.visaName)
-                .font(.subheadline).fontWeight(.semibold).lineLimit(2)
-                .foregroundColor(.primary)
+                .font(.sfSB(15)).tracking(-0.45).lineLimit(2)
+                .foregroundColor(.ink)
 
             HStack(spacing: 4) {
                 Circle().fill(Color(.systemGray4)).frame(width: 6, height: 6)
-                Text(visa.duration).font(.caption).foregroundColor(.secondary).lineLimit(1)
+                Text(visa.duration).font(.sfR(12)).tracking(-0.36).foregroundColor(.secondary).lineLimit(1)
             }
         }
         .padding(14)
@@ -390,19 +403,19 @@ struct WorkingTowardRow: View {
                 .frame(width: 48, height: 48)
                 .overlay(
                     Text(visa.countryCode)
-                        .font(.subheadline).fontWeight(.semibold).foregroundColor(.pink)
+                        .font(.sfSB(15)).tracking(-0.45).foregroundColor(.pink)
                 )
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(visa.country.uppercased())
-                    .font(.caption2).foregroundColor(.secondary).tracking(0.5)
-                Text(visa.visaName).font(.subheadline).fontWeight(.semibold)
+                    .font(.sfR(11)).tracking(-0.33).foregroundColor(.secondary).tracking(0.5)
+                Text(visa.visaName).font(.sfSB(15)).tracking(-0.45).foregroundColor(.ink)
             }
 
             Spacer()
 
             Text(tagLabel)
-                .font(.caption).fontWeight(.semibold)
+                .font(.sfSB(12)).tracking(-0.36)
                 .foregroundColor(tagColor)
                 .padding(.horizontal, 10).padding(.vertical, 5)
                 .background(tagColor.opacity(0.1)).cornerRadius(8)

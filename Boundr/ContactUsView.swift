@@ -35,7 +35,7 @@ struct ContactUsView: View {
                 Button { dismiss() } label: {
                     Image(systemName: "chevron.left")
                         .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(.primary)
+                        .foregroundColor(.ink)
                         .frame(width: 38, height: 38)
                         .background(Color(.systemGray6), in: Circle())
                 }
@@ -47,11 +47,11 @@ struct ContactUsView: View {
         Button(action: action) {
             HStack(spacing: 14) {
                 Image(systemName: icon)
-                    .font(.system(size: 16)).foregroundColor(.primary)
+                    .font(.system(size: 16)).foregroundColor(.ink)
                     .frame(width: 32, height: 32)
                     .background(Color(.systemGray6)).cornerRadius(8)
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(title).font(.subheadline).fontWeight(.semibold).foregroundColor(.primary)
+                    Text(title).font(.subheadline).fontWeight(.semibold).foregroundColor(.ink)
                     Text(subtitle).font(.caption).foregroundColor(.secondary)
                 }
                 Spacer()

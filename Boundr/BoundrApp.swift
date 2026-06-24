@@ -34,6 +34,7 @@ struct BoundrApp: App {
                 }
             }
             .preferredColorScheme(.light)
+            .foregroundStyle(Color.ink)   // default text color: #33363F instead of black
             .animation(.easeInOut(duration: 0.3), value: auth.isSignedIn)
             .animation(.easeInOut(duration: 0.3), value: auth.onboardingComplete)
             .onAppear {
