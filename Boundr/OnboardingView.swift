@@ -45,6 +45,7 @@ struct OnboardingView: View {
     @State private var occupation      = "Software Engineer"
     @State private var otherOccupation = ""
     @State private var experience: Double = 4
+    @State private var experienceSkipped = false
     @State private var relationshipStatus = "single"
     @State private var numberOfKids = 0
 
@@ -87,7 +88,7 @@ struct OnboardingView: View {
                     } label: {
                         Image(systemName: "chevron.left")
                             .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(.primary)
+                            .foregroundColor(.ink)
                             .frame(width: 38, height: 38)
                             .background(Color(.systemGray6), in: Circle())
                     }
@@ -98,7 +99,7 @@ struct OnboardingView: View {
                     Spacer()
                     // Skip button — only on non-critical steps
                     if [3, 4, 5, 6].contains(step) {
-                        Button { advance() } label: {
+                        Button { skipStep() } label: {
                             Text("Skip")
                                 .font(.subheadline)
                                 .foregroundColor(.secondary)
@@ -661,6 +662,7 @@ struct OnboardingView: View {
             .padding(.top, 16)
             VStack(spacing: 6) {
                 Slider(value: $experience, in: 0...20, step: 1).tint(.black)
+                    .onChange(of: experience) { experienceSkipped = false }
                 HStack {
                     Text("0").font(.caption).foregroundColor(.secondary)
                     Spacer()
@@ -736,7 +738,7 @@ struct OnboardingView: View {
                             Image(systemName: "plus")
                                 .font(.system(size: 16, weight: .semibold))
                                 .frame(width: 56, height: 56)
-                                .foregroundColor(.primary)
+                                .foregroundColor(.ink)
                         }
                     }
                     .background(Color(.systemBackground))
@@ -788,15 +790,15 @@ struct OnboardingView: View {
                 Divider().padding(.leading, 16)
                 summaryRow("Age",        "\(Int(age))")
                 Divider().padding(.leading, 16)
-                summaryRow("Education",  educationOptions.first { $0.key == education }?.label ?? education)
+                summaryRow("Education",  education.isEmpty ? "Not specified" : (educationOptions.first { $0.key == education }?.label ?? education))
                 Divider().padding(.leading, 16)
-                summaryRow("Occupation", occupation)
-                if !skipsExperience {
+                summaryRow("Occupation", occupation.isEmpty ? "Not specified" : occupation)
+                if !skipsExperience && !experienceSkipped {
                     Divider().padding(.leading, 16)
                     summaryRow("Experience", "\(Int(experience)) years")
                 }
                 Divider().padding(.leading, 16)
-                summaryRow("Status", relationshipOptions.first { $0.key == relationshipStatus }?.label ?? relationshipStatus)
+                summaryRow("Status", relationshipStatus.isEmpty ? "Not specified" : (relationshipOptions.first { $0.key == relationshipStatus }?.label ?? relationshipStatus))
             }
             .background(Color(.systemGray6))
             .cornerRadius(16)
@@ -838,6 +840,18 @@ struct OnboardingView: View {
 
     // MARK: - Advance
 
+    // Skip = leave this answer empty rather than committing the default.
+    private func skipStep() {
+        switch step {
+        case 3: education = ""
+        case 4: occupation = ""; otherOccupation = ""
+        case 5: experienceSkipped = true
+        case 6: relationshipStatus = ""; numberOfKids = 0
+        default: break
+        }
+        advance()
+    }
+
     private func advance() {
         if step == totalSteps - 2 {
             // Commit data before showing summary so counts are accurate
@@ -861,7 +875,7 @@ struct OnboardingView: View {
         store.user.age             = Int(age)
         store.user.educationLevel  = education
         store.user.occupation      = occupation == "Other" ? otherOccupation : occupation
-        store.user.experienceYears    = Int(experience)
+        store.user.experienceYears    = experienceSkipped ? 0 : Int(experience)
         store.user.relationshipStatus = relationshipStatus
         store.user.numberOfKids       = numberOfKids
     }

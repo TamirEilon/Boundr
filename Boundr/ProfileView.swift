@@ -32,7 +32,7 @@ struct ProfileView: View {
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 0) {
                     Text("Profile")
-                        .font(.custom("DMSans-SemiBold", size: 18))
+                        .font(.system(size: 18, weight: .semibold))
                         .foregroundColor(ink)
                         .frame(maxWidth: .infinity)
                         .padding(.top, 8)
@@ -87,10 +87,10 @@ struct ProfileView: View {
             HStack(spacing: 14) {
                 VStack(alignment: .leading, spacing: 6) {
                     Text("Rating is caring")
-                        .font(.custom("DMSans-SemiBold", size: 22))
+                        .font(.system(size: 22, weight: .semibold))
                         .foregroundColor(.white)
                     Text("Help us reach more people by\nrating the app")
-                        .font(.custom("DMSans-Regular", size: 14))
+                        .font(.system(size: 14, weight: .regular))
                         .foregroundColor(.white.opacity(0.9))
                         .lineLimit(2)
                         .fixedSize(horizontal: false, vertical: true)
@@ -168,7 +168,7 @@ struct ProfileView: View {
                 .foregroundColor(ink)
                 .frame(width: 20, height: 18, alignment: .center)
             Text(title)
-                .font(.custom("DMSans-SemiBold", size: 15))
+                .font(.system(size: 15, weight: .semibold))
                 .foregroundColor(ink)
             Spacer()
             Image(systemName: "chevron.right")

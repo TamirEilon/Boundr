@@ -146,14 +146,14 @@ struct VisaDetailView: View {
                             .shadow(color: .black.opacity(0.12), radius: 6, y: 2)
                             .overlay(
                                 Text(visa.countryCode)
-                                    .font(.headline).fontWeight(.bold).foregroundColor(.primary)
+                                    .font(.sfB(16)).tracking(-0.48).foregroundColor(.ink)
                             )
                         Text(visa.country.uppercased())
-                            .font(.caption).fontWeight(.semibold)
+                            .font(.sfSB(12)).tracking(-0.36)
                             .foregroundColor(.white.opacity(0.85))
                             .tracking(0.8)
                         Text(visa.visaName)
-                            .font(.title).fontWeight(.bold)
+                            .font(.sfB(28)).tracking(-0.84)
                             .foregroundColor(.white)
                             .fixedSize(horizontal: false, vertical: true)
                     }
@@ -168,7 +168,7 @@ struct VisaDetailView: View {
                     Button { dismiss() } label: {
                         Image(systemName: "chevron.left")
                             .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(.primary)
+                            .foregroundColor(.ink)
                             .frame(width: 38, height: 38)
                             .background(.regularMaterial, in: Circle())
                     }
@@ -183,7 +183,7 @@ struct VisaDetailView: View {
                                 } else {
                                     Image(systemName: "square.and.arrow.up")
                                         .font(.system(size: 15))
-                                        .foregroundColor(.primary)
+                                        .foregroundColor(.ink)
                                 }
                             }
                             .frame(width: 38, height: 38)
@@ -221,12 +221,12 @@ struct VisaDetailView: View {
     private var descriptionSection: some View {
         VStack(alignment: .leading, spacing: 14) {
             Text(visa.description)
-                .font(.subheadline)
-                .foregroundColor(.primary)
+                .font(.sfR(16)).tracking(-0.48)
+                .foregroundColor(.ink)
                 .fixedSize(horizontal: false, vertical: true)
 
             Text(exempt ? "No visa needed" : (eligible ? "Eligible" : "Not eligible"))
-                .font(.subheadline).fontWeight(.semibold)
+                .font(.sfSB(14)).tracking(-0.42)
                 .foregroundColor(exempt ? .blue : (eligible ? .green : .red))
                 .padding(.horizontal, 14).padding(.vertical, 7)
                 .background((exempt ? Color.blue : (eligible ? Color.green : Color.red)).opacity(0.12))
@@ -234,7 +234,7 @@ struct VisaDetailView: View {
 
             if exempt, let reason = store.exemptReason(for: visa) {
                 Text(reason)
-                    .font(.subheadline)
+                    .font(.sfR(14)).tracking(-0.42)
                     .foregroundColor(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -254,8 +254,8 @@ struct VisaDetailView: View {
     private func statCard(icon: String, label: String, value: String) -> some View {
         VStack(alignment: .leading, spacing: 5) {
             Image(systemName: icon).font(.system(size: 16)).foregroundColor(.secondary)
-            Text(label).font(.caption).foregroundColor(.secondary)
-            Text(value).font(.subheadline).fontWeight(.semibold)
+            Text(label).font(.sfR(12)).tracking(-0.36).foregroundColor(.secondary)
+            Text(value).font(.sfSB(14)).tracking(-0.42)
                 .fixedSize(horizontal: false, vertical: true)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
@@ -269,7 +269,7 @@ struct VisaDetailView: View {
     private var eligibilityCriteriaSection: some View {
         VStack(alignment: .leading, spacing: 14) {
             Text("Eligibility Criteria")
-                .font(.headline).fontWeight(.bold)
+                .font(.sfSB(18)).tracking(-0.54)
 
             VStack(spacing: 0) {
                 // Nationality
@@ -343,9 +343,9 @@ struct VisaDetailView: View {
         HStack(spacing: 12) {
             VStack(alignment: .leading, spacing: 2) {
                 Text(label)
-                    .font(.caption).foregroundColor(.secondary)
+                    .font(.sfR(12)).tracking(-0.36).foregroundColor(.secondary)
                 Text(value)
-                    .font(.subheadline).fontWeight(.medium)
+                    .font(.sfSB(14)).tracking(-0.42)
                     .fixedSize(horizontal: false, vertical: true)
             }
             Spacer()
@@ -371,7 +371,7 @@ struct VisaDetailView: View {
     private var requirementsSection: some View {
         VStack(alignment: .leading, spacing: 14) {
             Text("Application Requirements")
-                .font(.headline).fontWeight(.bold)
+                .font(.sfSB(18)).tracking(-0.54)
 
             VStack(spacing: 0) {
                 ForEach(Array(visa.requirements.enumerated()), id: \.offset) { idx, req in
@@ -385,7 +385,7 @@ struct VisaDetailView: View {
                                 .frame(width: 8, height: 8)
                         }
                         Text(req)
-                            .font(.subheadline)
+                            .font(.sfR(14)).tracking(-0.42)
                             .fixedSize(horizontal: false, vertical: true)
                             .padding(.top, 6)
                         Spacer()
@@ -408,7 +408,7 @@ struct VisaDetailView: View {
     private var howItWorksSection: some View {
         VStack(alignment: .leading, spacing: 14) {
             Text("How it works")
-                .font(.headline).fontWeight(.bold)
+                .font(.sfSB(18)).tracking(-0.54)
 
             VStack(spacing: 0) {
                 ForEach(Array(steps.enumerated()), id: \.offset) { idx, step in
@@ -418,14 +418,14 @@ struct VisaDetailView: View {
                                 .fill(Color(.systemGray6))
                                 .frame(width: 28, height: 28)
                             Text("\(idx + 1)")
-                                .font(.caption).fontWeight(.bold).foregroundColor(.primary)
+                                .font(.sfB(12)).tracking(-0.36).foregroundColor(.ink)
                         }
 
                         VStack(alignment: .leading, spacing: 3) {
                             Text(step.title)
-                                .font(.subheadline).fontWeight(.semibold)
+                                .font(.sfSB(14)).tracking(-0.42)
                             Text(step.detail)
-                                .font(.subheadline).foregroundColor(.secondary)
+                                .font(.sfR(14)).tracking(-0.42).foregroundColor(.secondary)
                                 .fixedSize(horizontal: false, vertical: true)
                         }
                         .padding(.top, 4)
@@ -462,9 +462,9 @@ struct VisaDetailView: View {
                         Image(systemName: saved ? "bookmark.fill" : "bookmark")
                             .font(.system(size: 15))
                         Text(saved ? "Saved" : "Save")
-                            .font(.subheadline).fontWeight(.semibold)
+                            .font(.sfSB(14)).tracking(-0.42)
                     }
-                    .foregroundColor(.primary)
+                    .foregroundColor(.ink)
                     .frame(width: saveWidth)
                     .padding(.vertical, 16)
                     .background(Color(.systemBackground))
@@ -476,7 +476,7 @@ struct VisaDetailView: View {
                     if let url = URL(string: visa.applicationURL) { openURL(url) }
                 } label: {
                     Text("Start application")
-                        .font(.subheadline).fontWeight(.semibold)
+                        .font(.sfSB(14)).tracking(-0.42)
                         .foregroundColor(.white)
                         .frame(width: applyWidth)
                         .padding(.vertical, 16)

@@ -67,7 +67,7 @@ struct SignInView: View {
                                 .font(.system(size: 18))
                                 .foregroundColor(rememberMe ? brandBlue : Color(.systemGray3))
                             Text("Remember me")
-                                .font(.subheadline).foregroundColor(.primary)
+                                .font(.subheadline).foregroundColor(.ink)
                         }
                     }
                     Spacer()
@@ -134,7 +134,7 @@ struct SignInView: View {
                 Button { dismiss() } label: {
                     Image(systemName: "chevron.left")
                         .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(.primary)
+                        .foregroundColor(.ink)
                         .frame(width: 34, height: 34)
                         .background(Color(.systemGray6), in: Circle())
                 }

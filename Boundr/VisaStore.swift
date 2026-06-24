@@ -89,11 +89,11 @@ class VisaStore: ObservableObject {
             "Japan|Highly Skilled Professional Visa":           ["Japanese"],
             "Japan|Temporary Visitor Visa":                     ["Japanese"],
             "Mexico|Temporary Resident Card (Work)":            ["Mexican"],
-            "New Zealand|Skilled Migrant Category Resident Visa": ["New Zealander"],
+            "New Zealand|Skilled Migrant Category Resident Visa": ["New Zealander", "Australian"],
             "Singapore|Employment Pass":                        ["Singaporean"],
             "South Korea|E-7 Skilled Worker Visa":              ["South Korean"],
             "Thailand|Long Term Resident (LTR) Visa - Work from Thailand": ["Thai"],
-            "UAE|Employment Visa":                              ["Emirati"],
+            "UAE|Employment Visa":                              ["Emirati", "Saudi", "Kuwaiti", "Qatari", "Bahraini", "Omani"],
             "United States|H-1B Specialty Occupation Visa":     ["American"],
             "United States|O\u{2011}1 (US) Extraordinary Ability visa": ["American"],
             "United States|B-2 Tourist Visa":                   ["American", "Canadian"],
@@ -203,7 +203,7 @@ class VisaStore: ObservableObject {
         "Mexico|Temporary Resident Card (Work)":
             "Mexican citizens have the right to live and work in Mexico without a residence card.",
         "New Zealand|Skilled Migrant Category Resident Visa":
-            "New Zealand citizens are already residents and don't need to apply for a skilled migrant visa.",
+            "New Zealand and Australian citizens already hold residence rights under the Trans-Tasman Travel Arrangement and don't need to apply for a skilled migrant visa.",
         "Singapore|Employment Pass":
             "Singaporean citizens can work in Singapore without an Employment Pass.",
         "South Korea|E-7 Skilled Worker Visa":
@@ -211,7 +211,7 @@ class VisaStore: ObservableObject {
         "Thailand|Long Term Resident (LTR) Visa - Work from Thailand":
             "Thai citizens can live and work in Thailand without a long-term resident visa.",
         "UAE|Employment Visa":
-            "Emirati citizens have the right to work in the UAE without an employment visa.",
+            "GCC citizens (UAE, Saudi Arabia, Kuwait, Qatar, Bahrain and Oman) can live and work in any Gulf Cooperation Council state, including the UAE, without an employment visa.",
         "United States|H-1B Specialty Occupation Visa":
             "US citizens can work in the United States without a work visa.",
         "United States|O\u{2011}1 (US) Extraordinary Ability visa":

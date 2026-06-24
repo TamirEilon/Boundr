@@ -16,7 +16,7 @@ struct ManageAccountView: View {
     private let hairline = Color.black.opacity(0.07)
 
     private func dm(_ size: CGFloat, _ semibold: Bool = false) -> Font {
-        Font.custom(semibold ? "DMSans-SemiBold" : "DMSans-Regular", size: size)
+        .system(size: size, weight: semibold ? .semibold : .regular)
     }
 
     var body: some View {
@@ -38,7 +38,7 @@ struct ManageAccountView: View {
 
                 if let deleteError {
                     Text(deleteError)
-                        .font(dm(13))
+                        .font(dm(13)).tracking(-0.39)
                         .foregroundColor(.red)
                         .frame(maxWidth: .infinity, alignment: .center)
                         .padding(.top, 16)
@@ -61,7 +61,7 @@ struct ManageAccountView: View {
                 }
             }
             ToolbarItem(placement: .principal) {
-                Text("Manage Account").font(dm(18, true)).foregroundColor(ink)
+                Text("Manage Account").font(dm(18, true)).tracking(-0.54).foregroundColor(ink)
             }
         }
         .alert("Delete account?", isPresented: $showDeleteConfirm) {
@@ -86,7 +86,7 @@ struct ManageAccountView: View {
                 .foregroundColor(ink)
                 .frame(width: 22, alignment: .center)
             Text(title)
-                .font(dm(15, true))
+                .font(dm(15, true)).tracking(-0.45)
                 .foregroundColor(ink)
             Spacer()
             Image(systemName: "chevron.right")

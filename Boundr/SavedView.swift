@@ -6,12 +6,12 @@ struct SavedView: View {
     var body: some View {
         NavigationStack {
             VStack(alignment: .leading, spacing: 0) {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Saved").font(.largeTitle).fontWeight(.bold)
-                    Text("\(store.savedVisas.count) visa\(store.savedVisas.count == 1 ? "" : "s")")
-                        .font(.subheadline).foregroundColor(.secondary)
-                }
-                .padding(.horizontal).padding(.top).padding(.bottom, 20)
+                Text("Saved")
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundColor(.ink)
+                    .frame(maxWidth: .infinity)
+                    .padding(.top, 8)
+                    .padding(.bottom, 20)
 
                 if store.savedVisas.isEmpty {
                     Spacer()

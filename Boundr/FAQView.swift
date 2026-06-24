@@ -34,7 +34,7 @@ struct FAQView: View {
     private let hairline = Color.black.opacity(0.08)
 
     private func dm(_ size: CGFloat, _ semibold: Bool = false) -> Font {
-        Font.custom(semibold ? "DMSans-SemiBold" : "DMSans-Regular", size: size)
+        .system(size: size, weight: semibold ? .semibold : .regular)
     }
 
     var body: some View {
@@ -62,7 +62,7 @@ struct FAQView: View {
                 }
             }
             ToolbarItem(placement: .principal) {
-                Text("FAQs").font(dm(18, true)).foregroundColor(ink)
+                Text("FAQs").font(dm(18, true)).tracking(-0.54).foregroundColor(ink)
             }
         }
     }
@@ -77,7 +77,7 @@ struct FAQView: View {
             } label: {
                 HStack(alignment: .top, spacing: 12) {
                     Text(faqs[index].question)
-                        .font(dm(15, true))
+                        .font(dm(15, true)).tracking(-0.45)
                         .foregroundColor(ink)
                         .multilineTextAlignment(.leading)
                         .fixedSize(horizontal: false, vertical: true)
@@ -95,7 +95,7 @@ struct FAQView: View {
 
             if isOpen {
                 Text(faqs[index].answer)
-                    .font(dm(14))
+                    .font(dm(14)).tracking(-0.42)
                     .foregroundColor(answerGray)
                     .lineSpacing(3)
                     .fixedSize(horizontal: false, vertical: true)

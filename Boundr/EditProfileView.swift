@@ -98,7 +98,7 @@ struct EditProfileView: View {
     private let labelGray   = Color(red: 0.44, green: 0.45, blue: 0.49)
 
     private func dm(_ size: CGFloat, _ semibold: Bool = false) -> Font {
-        Font.custom(semibold ? "DMSans-SemiBold" : "DMSans-Regular", size: size)
+        .system(size: size, weight: semibold ? .semibold : .regular)
     }
 
     var body: some View {
@@ -129,7 +129,7 @@ struct EditProfileView: View {
                                   display: { $0 })
                         if draft.occupation == "Other" {
                             TextField("Job title", text: $otherOccupation)
-                                .font(dm(16))
+                                .font(dm(16)).tracking(-0.48)
                                 .foregroundColor(ink)
                                 .padding(.horizontal, 16)
                                 .padding(.vertical, 16)
@@ -179,7 +179,7 @@ struct EditProfileView: View {
                 }
             }
             ToolbarItem(placement: .principal) {
-                Text("Edit Profile").font(dm(18, true)).foregroundColor(ink)
+                Text("Edit Profile").font(dm(18, true)).tracking(-0.54).foregroundColor(ink)
             }
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button {
@@ -190,7 +190,7 @@ struct EditProfileView: View {
                     store.user = saved
                     dismiss()
                 } label: {
-                    Text("Save").font(dm(16, true)).foregroundColor(ink)
+                    Text("Save").font(dm(16, true)).tracking(-0.48).foregroundColor(ink)
                 }
             }
         }
@@ -202,7 +202,7 @@ struct EditProfileView: View {
     private func formField(label: String, @ViewBuilder content: () -> some View) -> some View {
         VStack(alignment: .leading, spacing: 10) {
             Text(label)
-                .font(dm(13))
+                .font(dm(13)).tracking(-0.39)
                 .foregroundColor(labelGray)
             content()
         }
@@ -218,7 +218,7 @@ struct EditProfileView: View {
         } label: {
             HStack {
                 Text(display(selection.wrappedValue))
-                    .font(dm(16))
+                    .font(dm(16)).tracking(-0.48)
                     .foregroundColor(ink)
                 Spacer()
                 Image(systemName: "chevron.down")
@@ -235,7 +235,7 @@ struct EditProfileView: View {
 
     private func textRow(value: Binding<String>, keyboard: UIKeyboardType) -> some View {
         TextField("", text: value)
-            .font(dm(16))
+            .font(dm(16)).tracking(-0.48)
             .foregroundColor(ink)
             .keyboardType(keyboard)
             .padding(.horizontal, 16)
@@ -256,7 +256,7 @@ struct EditProfileView: View {
                     .foregroundColor(draft.numberOfKids == 0 ? Color(.systemGray3) : ink)
             }
             Text("\(draft.numberOfKids)")
-                .font(dm(18, true)).foregroundColor(ink)
+                .font(dm(18, true)).tracking(-0.54).foregroundColor(ink)
                 .frame(maxWidth: .infinity)
             Button {
                 draft.numberOfKids += 1
@@ -284,7 +284,7 @@ struct EditProfileView: View {
         } label: {
             HStack {
                 Text(draft.homeCountry.isEmpty ? "Select country" : draft.homeCountry)
-                    .font(dm(16))
+                    .font(dm(16)).tracking(-0.48)
                     .foregroundColor(draft.homeCountry.isEmpty ? Color(.systemGray3) : ink)
                 Spacer()
                 Image(systemName: "chevron.down")
@@ -304,7 +304,7 @@ struct EditProfileView: View {
                         draft.homeCountry = country
                         showCountryPicker = false
                     }
-                    .foregroundColor(.primary)
+                    .foregroundColor(.ink)
                 }
                 .searchable(text: $countrySearch, prompt: "Search country")
                 .navigationTitle("Select Country")
@@ -326,7 +326,7 @@ struct EditProfileView: View {
                 let isSelected = draft.relationshipStatus == option.key
                 Button { draft.relationshipStatus = option.key } label: {
                     Text(option.label)
-                        .font(dm(15, isSelected))
+                        .font(dm(15, isSelected)).tracking(-0.45)
                         .foregroundColor(isSelected ? .white : ink)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 17)
@@ -354,7 +354,7 @@ struct EditProfileView: View {
                     ForEach(draft.nationalities, id: \.self) { nat in
                         HStack(spacing: 6) {
                             Text(nat)
-                                .font(dm(14))
+                                .font(dm(14)).tracking(-0.42)
                             Button {
                                 draft.nationalities.removeAll { $0 == nat }
                             } label: {
@@ -379,7 +379,7 @@ struct EditProfileView: View {
                         Image(systemName: "plus")
                             .font(.system(size: 14, weight: .semibold))
                         Text("Add Nationality")
-                            .font(dm(16))
+                            .font(dm(16)).tracking(-0.48)
                     }
                     .foregroundColor(ink)
                     .padding(.horizontal, 16).padding(.vertical, 16)
@@ -396,7 +396,7 @@ struct EditProfileView: View {
                                 draft.nationalities.append(nat)
                                 showNationalityPicker = false
                             }
-                            .foregroundColor(.primary)
+                            .foregroundColor(.ink)
                         }
                         .searchable(text: $nationalitySearch, prompt: "Search nationality")
                         .navigationTitle("Select Nationality")
